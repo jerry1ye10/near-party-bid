@@ -1,21 +1,8 @@
-/*
- * This is an example of a Rust smart contract with two simple, symmetric functions:
- *
- * 1. set_greeting: accepts a greeting, such as "howdy", and records it for the user (account_id)
- *    who sent the request
- * 2. get_greeting: accepts an account_id and returns the greeting saved for it, defaulting to
- *    "Hello"
- *
- * Learn more about writing NEAR smart contracts with Rust:
- * https://github.com/near/near-sdk-rs
- *
- */
-
 // To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen, setup_alloc, AccountId, Promise};
 use near_sdk::{ext_contract};
-use near_sdk::collections::LookupMap;
+use near_sdk::collections::UnorderedMap;
 
 setup_alloc!();
 
@@ -24,7 +11,7 @@ setup_alloc!();
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Welcome {
-    records: LookupMap<String, String>,
+    records: UnorderedMap<String, u128>,
     money_goal: u128, 
     money_accrued: u128
 
@@ -39,8 +26,8 @@ pub struct Welcome {
 impl Default for Welcome {
   fn default() -> Self {
     Self {
-      records: LookupMap::new(b"a".to_vec()),
-      money_goal: Welcome::convert_near_to_yecto(10) as u128,
+      records: UnorderedMap::new(b"a".to_vec()),
+      money_goal: Welcome::convert_near_to_yecto(40) as u128,
       money_accrued: 0
     }
   }
@@ -54,6 +41,8 @@ impl Welcome{ //static functions
 }
 
 const SINGLE_CALL_GAS: u64 = 200000000000000;
+const token_id: &str = "298:5";
+
 #[ext_contract(ext_contract_paras)]
 trait ContractParas {
     fn nft_buy(&self, token_series_id: String, receiver_id: String); 
@@ -65,24 +54,40 @@ trait ContractParas {
 
 #[near_bindgen]
 impl Welcome {
-    pub fn set_greeting(&mut self, message: String) {
-        let account_id = env::signer_account_id();
 
-        // Use env::log to record logs permanently to the blockchain!
-        env::log(format!("Saving greeting '{}' for account '{}'", message, account_id,).as_bytes());
-
-        self.records.insert(&account_id, &message);
+    pub fn get_money_accrued(self)-> u128{
+        return self.money_accrued; 
     }
 
-    // `match` is similar to `switch` in other languages; here we use it to default to "Hello" if
-    // self.records.get(&account_id) is not yet defined.
-    // Learn more: https://doc.rust-lang.org/book/ch06-02-match.html#matching-with-optiont
-    pub fn get_greeting(&self, account_id: String) -> String {
-        match self.records.get(&account_id) {
-            Some(greeting) => greeting,
-            None => "Hello".to_string(),
+    pub fn get_money_goal(self)-> u128{
+        return self.money_goal; 
+    }
+
+    pub fn get_records(self)-> (Vec<String>, Vec<u128>) {
+
+        let mut accounts = Vec::new();
+        let mut tokens = Vec::new();
+        for key in self.records.keys(){
+            let copyKey = key.clone();
+            accounts.push(key);
+            let valEnum = self.records.get(&copyKey);
+            match valEnum{ 
+                Some(number) => tokens.push(number),
+                None => tokens.push(0)
+            }
         }
+        return (accounts, tokens);
     }
+
+    pub fn get_record(&self, account_id: &String) -> u128{
+        let record =  self.records.get(&account_id); 
+        match record{
+            None => 0,
+            Some(number) =>  number,
+        }
+
+    }
+
 
     #[payable]
     pub fn pay_money(&mut self){
@@ -90,10 +95,10 @@ impl Welcome {
         let deposit = env::attached_deposit();
         let current_account = env::current_account_id();
         self.money_accrued += deposit;
+        self.records.insert(&account_id, &(deposit + Welcome::get_record(self, &account_id)));
         if self.money_accrued > self.money_goal {
-            //Promise::new(account_id).transfer(Welcome::convert_near_to_yecto(10) as u128);
             ext_contract_paras::nft_buy(
-                "298".to_string(),
+                token_id.to_string(),
                 current_account, 
                 // &'static_str
                 &"paras-token-v2.testnet", // contract account id
