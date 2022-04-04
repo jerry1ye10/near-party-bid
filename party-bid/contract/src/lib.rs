@@ -14,6 +14,7 @@
 // To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::{env, near_bindgen, setup_alloc, AccountId, Promise};
+use near_sdk::{ext_contract};
 use near_sdk::collections::LookupMap;
 
 setup_alloc!();
@@ -26,7 +27,12 @@ pub struct Welcome {
     records: LookupMap<String, String>,
     money_goal: u128, 
     money_accrued: u128
+
 }
+//Hashmap of accountname: money contributed
+//Buy the nft when theres enough money 
+//distribute tokens based off the hashmap
+//Once the nft is sold give money abased off token distribution 
 
 
 
@@ -34,7 +40,7 @@ impl Default for Welcome {
   fn default() -> Self {
     Self {
       records: LookupMap::new(b"a".to_vec()),
-      money_goal: Welcome::convert_near_to_yecto(3) as u128,
+      money_goal: Welcome::convert_near_to_yecto(10) as u128,
       money_accrued: 0
     }
   }
@@ -46,6 +52,15 @@ impl Welcome{ //static functions
     }
 
 }
+
+const SINGLE_CALL_GAS: u64 = 200000000000000;
+#[ext_contract(ext_contract_paras)]
+trait ContractParas {
+    fn nft_buy(&self, token_series_id: String, receiver_id: String); 
+}
+
+
+
 
 
 #[near_bindgen]
@@ -73,10 +88,19 @@ impl Welcome {
     pub fn pay_money(&mut self){
         let account_id = env::signer_account_id(); 
         let deposit = env::attached_deposit();
+        let current_account = env::current_account_id();
         self.money_accrued += deposit;
         if self.money_accrued > self.money_goal {
-            Promise::new(account_id).transfer(Welcome::convert_near_to_yecto(10) as u128);
-
+            //Promise::new(account_id).transfer(Welcome::convert_near_to_yecto(10) as u128);
+            ext_contract_paras::nft_buy(
+                "298".to_string(),
+                current_account, 
+                // &'static_str
+                &"paras-token-v2.testnet", // contract account id
+                Welcome::convert_near_to_yecto(1) as u128, // yocto NEAR to attach
+                SINGLE_CALL_GAS // gas to attach
+            );
+            
         }
     }
 }
