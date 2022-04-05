@@ -1,2 +1,2 @@
-cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/jerryye/near-party-bid/party-bid/contract/target/wasm32-unknown-unknown/debug/build/typenum-c17d70343d07e79f/out/consts.rs
-cargo:rustc-env=TYPENUM_BUILD_OP=/Users/jerryye/near-party-bid/party-bid/contract/target/wasm32-unknown-unknown/debug/build/typenum-c17d70343d07e79f/out/op.rs
+cargo:rustc-env=TYPENUM_BUILD_CONSTS=/Users/jerryye/near-test/near-party-bid/party-bid/contract/target/wasm32-unknown-unknown/debug/build/typenum-c17d70343d07e79f/out/consts.rs
+cargo:rustc-env=TYPENUM_BUILD_OP=/Users/jerryye/near-test/near-party-bid/party-bid/contract/target/wasm32-unknown-unknown/debug/build/typenum-c17d70343d07e79f/out/op.rs
