@@ -6,7 +6,7 @@ import "./global.css";
 import moon from "./assets/moon_nft.jpg";
 
 import getConfig from "./config";
-const { networkId } = getConfig(process.env.NODE_ENV || "development");
+const { networkId } = getConfig("development");
 
 export default function App() {
   // use React Hooks to store greeting in component state
