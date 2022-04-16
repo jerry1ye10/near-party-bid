@@ -9,6 +9,7 @@ setup_alloc!();
 #[serde(crate = "near_sdk::serde")]
 pub struct DeployArgs {
     money_goal: u128,
+    nft_id: String,
 }
 
 #[near_bindgen]
@@ -29,10 +30,10 @@ const CODE: &[u8] = include_bytes!("./greeter.wasm");
 
 #[near_bindgen]
 impl Factory {
-    pub fn deploy(self, money_goal: u128) {
-        let init_args = &DeployArgs { money_goal };
+    pub fn deploy(self, money_goal: u128, nft_id: String ) {
+        let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id };
 
-        Promise::new("dev-1649971938317-53315658254381".parse().unwrap())
+        Promise::new("dev-1649971938317-53315658254389".parse().unwrap())
             .create_account()
             .add_full_access_key(env::signer_account_pk())
             .transfer(1_000_000_000_000_000_000_000_0000)
