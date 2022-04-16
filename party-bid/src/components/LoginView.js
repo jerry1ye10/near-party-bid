@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { login, logout } from "../utils";
+import { Button } from "@chakra-ui/react";
 
 export default function LoginView() {
   if (window.walletConnection.isSignedIn()) {
     return (
-      <button className="link" style={{ float: "right" }} onClick={login}>
+      <Button className="link" style={{ float: "right" }} onClick={login}>
         Sign In
-      </button>
+      </Button>
     );
   }
   return (
-    <button className="link" style={{ float: "right" }} onClick={logout}>
+    <Button className="link" style={{ float: "right" }} onClick={logout}>
       Sign out
-    </button>
+    </Button>
   );
 }

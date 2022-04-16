@@ -100,3 +100,13 @@ On Windows, if you're seeing an error containing `EPERM` it may be related to sp
   [NEAR Wallet]: https://wallet.testnet.near.org/
   [near-cli]: https://github.com/near/near-cli
   [gh-pages]: https://github.com/tschaub/gh-pages
+
+If you run into the following error:
+
+```
+error[E0463]: can't find crate for `core`
+  |
+  = note: the `wasm32-unknown-unknown` target may not be installed
+  = help: consider downloading the target with `rustup target add wasm32-unknown-unknown`
+```
+try running `rustup target add wasm32-unknown-unknown` (source: https://stackoverflow.com/questions/66252428/errore0463-cant-find-crate-for-core-note-the-wasm32-unknown-unknown-t)

@@ -1,17 +1,21 @@
 import React, { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import Party from "./views/party";
-import CreateParty from "./views/create_party";
+import { CreateTeam, Home, Team, Teams, Governance } from "./views";
+import { ChakraProvider } from "@chakra-ui/react";
 
 export default function App() {
   return (
     // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
     <>
-      <Routes>
-        <Route path="/party" element={<Party />} />
-        <Route path="/create" element={<CreateParty />} />
-      </Routes>
+      <ChakraProvider>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/team" element={<Team />} />
+          <Route path="/create" element={<CreateTeam />} />
+          <Route path="/teams" element={<Teams />} />
+          <Route path="/gov" element={<Governance />} />
+        </Routes>
+      </ChakraProvider>
     </>
   );
 }
