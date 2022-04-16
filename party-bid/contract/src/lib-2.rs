@@ -14,6 +14,7 @@ pub struct Welcome {
     records: UnorderedMap<String, u128>,
     money_goal: u128,
     money_accrued: u128,
+    nft_id: String,
 }
 //Hashmap of accountname: money contributed
 //Buy the nft when theres enough money
@@ -33,12 +34,13 @@ pub struct Welcome {
 #[near_bindgen]
 impl Welcome {
     #[init]
-    pub fn new(money_goal: u128) -> Self {
+    pub fn new(money_goal: u128, nft_id: String) -> Self {
         assert!(!env::state_exists(), "Already, initialized");
         Self {
             records: UnorderedMap::new(b"a".to_vec()),
             money_goal: money_goal,
             money_accrued: 0,
+            nft_id: nft_id,
         }
     }
 }
@@ -51,7 +53,6 @@ impl Welcome {
 }
 
 const SINGLE_CALL_GAS: u64 = 200000000000000;
-const TOKEN_ID: &str = "34";
 
 #[ext_contract(ext_contract_paras)]
 trait ContractParas {
@@ -69,7 +70,18 @@ impl Welcome {
     }
 
     pub fn get_records(self) -> (Vec<String>, Vec<u128>) {
-        return self.records.to_vec();
+        let mut accounts = Vec::new();
+        let mut tokens = Vec::new();
+        for key in self.records.keys(){
+            let copyKey = key.clone();
+            accounts.push(key);
+            let valEnum = self.records.get(&copyKey);
+            match valEnum{ 
+                Some(number) => tokens.push(number),
+                None => tokens.push(0)
+            }
+        }
+        return (accounts, tokens);
     }
 
     // Check our records for a specific account id.
@@ -103,10 +115,12 @@ impl Welcome {
             &(deposit + Welcome::get_record(self, &account_id)),
         );
 
+        let token_id = &self.nft_id;
+
         // Check if we have reached enough funding to fulfill our goal.
         if self.money_accrued >= self.money_goal {
             ext_contract_paras::nft_buy(
-                TOKEN_ID.to_string(),
+                token_id.to_string(),
                 current_account,
                 // &'static_str
                 &"paras-token-v2.testnet", // contract account id

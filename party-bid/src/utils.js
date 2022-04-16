@@ -20,20 +20,27 @@ export async function initContract() {
   // Getting the Account ID. If still unauthorized, it's just empty string
   window.accountId = window.walletConnection.getAccountId();
 
-  // Initializing our contract APIs by contract name and configuration
+  window.parasContract = new Contract(
+    window.walletConnection.account(),
+    "paras-token-v2.testnet",
+    {
+      // name of contract you're connecting to
+      viewMethods: ["nft_get_series_price"], // view methods do not change state but usually return a value
+    }
+  );
   window.contract = await new Contract(
     window.walletConnection.account(),
     nearConfig.contractName,
     {
       // View methods are read only. They don't modify the state, but usually return some value.
       viewMethods: [
-        "get_money_accrued",
-        "get_money_goal",
-        "get_record",
-        "get_records",
+        // "get_money_accrued",
+        // "get_money_goal",
+        // "get_record",
+        // "get_records",
       ],
       // Change methods can modify the state. But you don't receive the returned value when called.
-      changeMethods: ["pay_money"],
+      changeMethods: ["deploy"],
     }
   );
 }

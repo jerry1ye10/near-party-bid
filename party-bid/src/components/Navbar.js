@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Text, Button } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
+import LoginView from "./LoginView";
 export const Navbar = () => {
   const pages = [
     { name: "+ Create Team", url: "/create" },
@@ -40,6 +41,9 @@ export const Navbar = () => {
             </Button>
           </Link>
         ))}
+      </Box>
+      <Box>
+        <LoginView />
       </Box>
     </Box>
   );
