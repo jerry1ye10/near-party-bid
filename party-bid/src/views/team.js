@@ -1,21 +1,21 @@
 import "regenerator-runtime/runtime";
 import React, { useState } from "react";
 import { login, logout } from "../utils";
-import Grid from "@mui/material/Grid";
 import moon from "../assets/moon_nft.jpg";
 import LoginView from "../components/LoginView";
-
+import { Layout } from "../components/Layout";
 import getConfig from "../config";
+import { Grid, Input, Button } from "@chakra-ui/react";
 const { networkId } = getConfig("development");
 
-export default function Party() {
+export const Team = () => {
   const [money_accrued, set_money_accrued] = useState(0.0);
   const [money_goal, set_money_goal] = useState(0.0);
   const [money_entered, set_money_entered] = useState(" ");
   const [transactionsData, setTransactions] = useState({});
 
-  // when the user has not yet interacted with the form, disable the button
-  const [buttonDisabled, setButtonDisabled] = React.useState(true);
+  // when the user has not yet interacted with the form, disable the Button
+  const [ButtonDisabled, setButtonDisabled] = React.useState(true);
 
   const roundToHundredth = (value) => {
     return Number(value.toFixed(2));
@@ -71,7 +71,7 @@ export default function Party() {
 
   return (
     // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
-    <>
+    <Layout>
       <main>
         <LoginView />
 
@@ -79,12 +79,12 @@ export default function Party() {
           {money_accrued < money_goal ? <>Almost there </> : <> NFT Bought!</>}
         </h1>
 
-        <Grid container spacing={2}>
-          <Grid item xs={2}></Grid>
-          <Grid item xs={4}>
+        <Grid spacing={2}>
+          <Grid xs={2}></Grid>
+          <Grid xs={4}>
             <img src={moon} width={300} height={300} />
           </Grid>
-          <Grid item xs={4}>
+          <Grid xs={4}>
             <Grid container spacing={0}>
               <Grid item xs={12}>
                 Money Needed: {money_goal}
@@ -123,14 +123,14 @@ export default function Party() {
         </div>
 
         <div style={{ justifyContent: "center", display: "flex" }}>
-          <input
+          <Input
             type="text"
             value={money_entered}
             onChange={(e) => {
               set_money_entered(e.target.value);
             }}
           />
-          <button
+          <Button
             style={{
               justifyContent: "center",
               display: "flex",
@@ -139,9 +139,9 @@ export default function Party() {
             onClick={send_money}
           >
             Send Money
-          </button>
+          </Button>
         </div>
       </main>
-    </>
+    </Layout>
   );
-}
+};

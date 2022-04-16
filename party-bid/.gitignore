@@ -5,7 +5,7 @@
 /.pnp
 .pnp.js
 
-/contract/target/**/*.*
+/contract/target/**/*
 
 party-bid/contract/target/**/*.*
 

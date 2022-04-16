@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
-export default function CreateParty() {
+import { Layout } from "../components/Layout";
+import { Button, Input } from "@chakra-ui/react";
+export const CreateTeam = () => {
   const [url, set_url] = useState("");
   function createParty() {}
 
   return (
-    <>
+    <Layout>
       Enter Url:{" "}
-      <input
+      <Input
         type="text"
         value={url}
         onChange={(e) => {
           set_url(e.target.value);
         }}
       />
-      <button
+      <Button
         style={{
           justifyContent: "center",
           display: "flex",
@@ -22,7 +24,7 @@ export default function CreateParty() {
         onClick={createParty}
       >
         Create Party{" "}
-      </button>
-    </>
+      </Button>
+    </Layout>
   );
-}
+};
