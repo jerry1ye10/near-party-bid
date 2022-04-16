@@ -15,7 +15,13 @@ pub struct DeployArgs {
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Factory;
 
+impl Default for Factory {
+  fn default() -> Self {
+    Self {
 
+    }
+  }
+}
 
 const CODE: &[u8] = include_bytes!("./greeter.wasm");
 
