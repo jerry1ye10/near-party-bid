@@ -31,9 +31,11 @@ const CODE: &[u8] = include_bytes!("./greeter.wasm");
 #[near_bindgen]
 impl Factory {
     pub fn deploy(self, money_goal: u128, nft_id: String ) {
+        let mut account_id: String = "dev-".to_string();
+        account_id.push_str(&nft_id);
         let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id };
 
-        Promise::new("dev-1649971938317-53315658254389".parse().unwrap())
+        Promise::new(account_id.parse().unwrap())
             .create_account()
             .add_full_access_key(env::signer_account_pk())
             .transfer(1_000_000_000_000_000_000_000_0000)
