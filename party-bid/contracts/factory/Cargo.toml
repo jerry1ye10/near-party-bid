@@ -2,7 +2,7 @@
 name = "party_factory"
 version = "0.1.0"
 authors = ["Jerry Ye <jerry1ye10@gmail.com>", "Ben Thomas <ben@zepher.dev>"]
-edition = "2021"
+edition = "2018"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

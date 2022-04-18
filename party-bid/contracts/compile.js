@@ -28,9 +28,10 @@ const debug = process.argv.pop() === "--debug";
 // Note: see other flags in ./cargo/config. Unfortunately, you cannot set the
 // `--target option` in Cargo.toml.
 const buildCmd = debug
-  ? "cargo build --target wasm32-unknown-unknown --manifest-path=party/Cargo.toml && cargo build --target wasm32-unknown-unknown --manifest-path=factory/Cargo.toml"
+  ? "cd party && cargo build --target wasm32-unknown-unknown && cd ../factory && cargo build --target wasm32-unknown-unknown"
   : "cargo build --target wasm32-unknown-unknown --release --manifest-path=party/Cargo.toml && cargo build --target wasm32-unknown-unknown --release --manifest-path=factory/Cargo.toml";
 
+console.log(`Running: ${buildCmd}`);
 // Execute the build command, storing exit code for later use
 const { code } = sh.exec(buildCmd);
 
@@ -39,6 +40,7 @@ const { code } = sh.exec(buildCmd);
 // When running commands like `near deploy`, near-cli looks for a contract at
 // <CURRENT_DIRECTORY>/out/main.wasm
 if (code === 0 && calledFromDir !== __dirname) {
+  console.log("Rust build succeeded, now linking...")
   const linkDir = `${calledFromDir}/out`;
   const link = `${calledFromDir}/out/main.wasm`;
   const packageName = require("fs")
@@ -48,10 +50,11 @@ if (code === 0 && calledFromDir !== __dirname) {
   const outFile = `${__dirname}/factory/target/wasm32-unknown-unknown/${
     debug ? "debug" : "release"
   }/${packageName}.wasm`;
-  console.log(outFile);
   sh.mkdir("-p", linkDir);
-  sh.rm("-f", link);
+  //sh.rm("-f", link);
   //fixes #831: copy-update instead of linking .- sometimes sh.ln does not work on Windows
+  //print copying outfile to link
+  console.log(`Copying ${outFile} to ${link}`);
   sh.cp("-u", outFile, link);
 }
 
