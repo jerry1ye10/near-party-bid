@@ -31,7 +31,7 @@ const CODE: &[u8] = include_bytes!("./greeter.wasm");
 #[near_bindgen]
 impl Factory {
     pub fn deploy(self, money_goal: u128, nft_id: String ) {
-        let mut account_id: String = "dev-".to_string();
+        let mut account_id: String = "dev-1650291992640-60218357254222".to_string();
         account_id.push_str(&nft_id);
         let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id };
 

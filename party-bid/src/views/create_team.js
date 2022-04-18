@@ -13,9 +13,9 @@ export const CreateTeam = () => {
     const response = await window.parasContract.nft_get_series_price({
       token_series_id: nftId,
     });
-    console.log(parseInt(response));
+    //console.log(parseInt(response));
     window.contract.deploy({
-      money_goal: parseInt(response),
+      money_goal: 10000000000,
       nft_id: nftId,
     });
   }

@@ -3,16 +3,19 @@ import React, { useState } from "react";
 import { login, logout } from "../utils";
 import moon from "../assets/moon_nft.jpg";
 import LoginView from "../components/LoginView";
+import { connect, Contract, keyStores, WalletConnection } from "near-api-js";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import getConfig from "../config";
 import { Grid, Input, Button } from "@chakra-ui/react";
 const { networkId } = getConfig("development");
 
-export const Team = () => {
+export const Team = (props) => {
   const [money_accrued, set_money_accrued] = useState(0.0);
   const [money_goal, set_money_goal] = useState(0.0);
   const [money_entered, set_money_entered] = useState(" ");
   const [transactionsData, setTransactions] = useState({});
+  const [contract, setContract] = useState({})
 
   // when the user has not yet interacted with the form, disable the Button
   const [ButtonDisabled, setButtonDisabled] = React.useState(true);
@@ -28,19 +31,49 @@ export const Team = () => {
   function convert_near_to_yocto(near_val) {
     return roundToHundredth(near_val * 1000000000000000000000000);
   }
+  const history = useLocation();
+
+  const [teamId, setTeamId] = useState("")
+
+  function getTeamId(path){
+    //given pathname 
+    return path.split("/")[2];
+  }
+
 
   React.useEffect(
-    () => {
+    async () => {
+      const id = getTeamId(window.location.pathname);
+      setTeamId(id)
+
+      const newContract = await new Contract(
+        window.walletConnection.account(),
+        id,
+        {
+          viewMethods: [
+            "get_money_accrued",
+            "get_money_goal",
+            "get_record",
+            "get_records",
+          ],
+          changeMethods: ["pay_money"],
+        }
+      );
+
+      setContract(newContract)
+
+      console.log(await newContract.get_money_accrued())
+
       // in this case, we only care to query the contract when signed in
       if (window.walletConnection.isSignedIn()) {
         // window.contract is set by initContract in index.js
-        window.contract.get_money_accrued().then((money_accrued) => {
+        newContract.get_money_accrued().then((money_accrued) => {
           set_money_accrued(convert_yocto_to_near(money_accrued));
         });
-        window.contract.get_money_goal().then((money_goal) => {
+        newContract.get_money_goal().then((money_goal) => {
           set_money_goal(convert_yocto_to_near(money_goal) + 1);
         });
-        window.contract.get_records().then((records) => {
+        newContract.get_records().then((records) => {
           console.log("hello");
           let transactions = {};
           for (let i = 0; i < records[0].length; i++) {
@@ -55,14 +88,14 @@ export const Team = () => {
     // The second argument to useEffect tells React when to re-run the effect
     // Use an empty array to specify "only run on first render"
     // This works because signing into NEAR Wallet reloads the page
-    []
+    [history]
   );
 
   // if not signed in, return early with sign-in prompt
 
   function send_money() {
     const deposit = money_entered.concat("000000000000000000000000");
-    window.contract.pay_money(
+    contract.pay_money(
       {},
       "300000000000000", // attached GAS (optional)
       deposit // attached deposit in yoctoNEAR (optional)
@@ -73,7 +106,6 @@ export const Team = () => {
     // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
     <Layout>
       <main>
-        <LoginView />
 
         <h1 style={{ justifyContent: "center", display: "flex" }}>
           {money_accrued < money_goal ? <>Almost there </> : <> NFT Bought!</>}
