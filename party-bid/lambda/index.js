@@ -1,4 +1,7 @@
 const https = require('https'); // or https
+var AWS = require('aws-sdk');
+AWS.config.update({region: 'us-east-1'});
+var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 
 const defaultOptions = {
     host: 'rpc.testnet.near.org',
@@ -37,10 +40,42 @@ exports.handler = async (event) => {
         };
 
     let resp = await post(body);
+    // If the resp contains a key 'error' then the contract is invalid
+    if (resp.error) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: 'Invalid contract'
+            })
+        }
+    }
 
-    return response;
+    // Now we know that the contract exists, check it's code hash located in resp.result.hash
+    // If it matches the hash of the party contract, then we can index it in dynamodb
+    if (resp.result.hash !== process.env.partyhash) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: 'Invalid contract'
+            })
+        }
+    }
+
+    // If we've made it this far, then the contract is valid, and we can add it to dynamodb.
+    // If it already exists, then we'll just overwrite it and it's no big deal.
+    const params = {
+        TableName: "Parties",
+        Item: {
+            'Address' : {S: event.contract_id}
+        }
+    }
+
+    await ddb.putItem(params).promise();
+
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            message: 'Contract Indexed'
+        })
+    }
 };
-
-exports.handler({
-    contract_id: 'dev-1650299149015-25598058530011'
-});
