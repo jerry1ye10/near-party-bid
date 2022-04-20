@@ -5,10 +5,11 @@ use near_sdk::{env, near_bindgen, setup_alloc, Promise};
 
 setup_alloc!();
 
+
 #[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
 pub struct DeployArgs {
-    money_goal: u128,
+    money_goal: String,
     nft_id: String,
 }
 
@@ -30,7 +31,8 @@ const CODE: &[u8] = include_bytes!("./greeter.wasm");
 
 #[near_bindgen]
 impl Factory {
-    pub fn deploy(self, money_goal: u128, nft_id: String ) {
+
+    pub fn deploy(self, money_goal: String, nft_id: String ) -> String {
         let mut account_id: String = "dev-1650291992640-60218357254222".to_string();
         account_id.push_str(&nft_id);
         let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id };
@@ -44,7 +46,9 @@ impl Factory {
                 b"new".to_vec(),
                 serde_json::to_vec(init_args).unwrap(),
                 0,
-                1_000_000_000_0000,
+                250_000_000_000_000,
+            ).then(
+              return "Success".to_string()
             );
     }
 }

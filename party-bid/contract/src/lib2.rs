@@ -1,8 +1,10 @@
 // To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
+use near_sdk::serde::{Deserialize, Serialize};
+use near_sdk::serde_json;
 use near_sdk::collections::UnorderedMap;
 use near_sdk::ext_contract;
-use near_sdk::{env, near_bindgen, setup_alloc, AccountId, PanicOnDefault, Promise};
+use near_sdk::{env, near_bindgen, setup_alloc, AccountId, PanicOnDefault, Promise, PromiseResult, PromiseOrValue };
 
 setup_alloc!();
 
@@ -23,26 +25,58 @@ pub struct Welcome {
 
 // impl Default for Welcome {
 //   fn default() -> Self {
-//     Self {
-//       records: UnorderedMap::new(b"a".to_vec()),
-//       money_goal: Welcome::convert_near_to_yecto(2) as u128,
-//       money_accrued: 0
-//     }
+    // Self {
+    //   records: UnorderedMap::new(b"a".to_vec()),
+    //   money_goal: Welcome::convert_near_to_yecto(2) as u128,
+    //   money_accrued: 0
+    // }
 //   }
 // }
+
+// #[ext_contract(ext_self)]
+// pub trait ExtSelf {
+//     fn callback_promise_result(nft_id: String, money_goal: u128);
+// }
+
+
+// #[near_bindgen]
+// impl Welcome{
+
+//     #[private]
+//     pub fn callback_promise_result(nft_id: String, money_goal: u128) {
+//         match env::promise_result(0) {
+//             PromiseResult::NotReady => unreachable!(),
+//             PromiseResult::Failed => env::panic(b"ERR_CALL_FAILED"),
+//             PromiseResult::Successful(val) => {
+//                 //set a loca
+//                 if let Ok(goal) = near_sdk::serde_json::from_slice::<String>(&val) {
+//                   money_goal = goal.parse::<u128>().unwrap();
+                    
+//                 } else {
+//                     env::panic(b"ERR_WRONG_VAL_RECEIVED")
+//                 }
+//             },
+//         }
+//     }
+// }
+
 
 #[near_bindgen]
 impl Welcome {
     #[init]
-    pub fn new(money_goal: u128, nft_id: String) -> Self {
+    pub fn new(money_goal: String, nft_id: String) -> Self {
         assert!(!env::state_exists(), "Already, initialized");
-        Self {
-            records: UnorderedMap::new(b"a".to_vec()),
-            money_goal: money_goal,
-            money_accrued: 0,
-            nft_id: nft_id,
+        return Self{
+            records: 
+            UnorderedMap::new(b"a".to_vec()),
+                money_goal: money_goal.parse::<u128>().unwrap(),
+                money_accrued: 0,
+                nft_id : nft_id
+        };
+
         }
-    }
+    
+    
 }
 
 impl Welcome {
@@ -52,11 +86,13 @@ impl Welcome {
     }
 }
 
-const SINGLE_CALL_GAS: u64 = 200000000000000;
+const SINGLE_CALL_GAS: u64 = 30_000_000_000_000;
 
 #[ext_contract(ext_contract_paras)]
 trait ContractParas {
     fn nft_buy(&self, token_series_id: String, receiver_id: String);
+    fn nft_get_series_price(&self, token_series_id: String) -> String;
+
 }
 
 #[near_bindgen]
@@ -64,6 +100,8 @@ impl Welcome {
     pub fn get_money_accrued(self) -> u128 {
         return self.money_accrued;
     }
+
+   
 
     pub fn get_money_goal(self) -> u128 {
         return self.money_goal;
