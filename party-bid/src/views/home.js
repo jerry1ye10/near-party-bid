@@ -1,54 +1,65 @@
 import React from "react";
 import { Layout } from "../components/Layout";
 import { Box, Text, Image, Button } from "@chakra-ui/react";
-import NFT from "../assets/nft_home_page.png";
+import ORB from "../assets/orb.svg";
+import { NFTCard } from "../components/NFTCard";
 export const Home = () => {
   return (
     <Layout>
+      {/* BG */}
       <Box
-        mt="30px"
-        borderRadius="15px"
-        height="fit-content"
+        position="absolute"
+        height="500px"
         width="100%"
-        display="flex"
-        flexDir={["column", null, null, "row"]}
-        bg="rgb(227,220,240)"
-      >
-        <Box
-          maxW={[null, null, null, "600px"]}
-          pt={["10px", null, null, "100px"]}
-          px={["10px", null, null, "50px"]}
-        >
-          <Text
-            fontWeight="500"
-            fontSize={["4xl", null, null, "5xl"]}
-            textAlign={["center", null, null, "unset"]}
+        bg="linear-gradient(#FDE0CD, #FFFCF3)"
+        left="0"
+        top="0"
+        right="0"
+        zIndex={-1}
+      />
+      <Image
+        display={["none", null, "unset"]}
+        position="absolute"
+        src={ORB}
+        right="0"
+        top="100px"
+        zIndex={-1}
+      />
+      <Box mt="68px" fontWeight="700" fontSize="48px" lineHeight="58px">
+        <Text>Join a team, pool NEAR</Text>
+        <Text>
+          Buy NFTs
+          <Box
+            ml="14px"
+            as="span"
+            background="linear-gradient(90.85deg, #4C5CE6 35.33%, #F95D12 62.15%)"
+            backgroundClip="text"
           >
-            Join a team and buy the{" "}
-            <Box as="span" borderBottom="5px solid rgb(0,114,205)">
-              NFT
-            </Box>{" "}
-            of your dreams.
-          </Text>
-          <Button size="lg" mt="30px">
-            Create Team
-          </Button>
+            together
+          </Box>
+        </Text>
+        <Text fontWeight="500" fontSize="14px">
+          Buy, tokenize, and sell NFTs on
+          <Box ml="4px" as="span" color="#5951BF">
+            NEAR
+          </Box>
+          , now with friends
+        </Text>
+        <Box display="flex" sx={{ columnGap: "10px" }}>
+          <Button variant="primary">Create your BLOC</Button>
+          <Button variant="outline">Join a BLOC</Button>
         </Box>
-        <Box
-          ml={["10px", null, null, "30px"]}
-          width="100%"
-          display="flex"
-          alignItems="center"
-          justifyContent="center"
-          height={["300px", null, null, "500px"]}
-        >
-          <Image
-            borderRadius="5px"
-            boxShadow="3px 3px 9px 5px rgba(0,0,0,0.27)"
-            height={["90%"]}
-            src={NFT}
-          />
-        </Box>
+      </Box>
+      <Box
+        mt="250px"
+        display="grid"
+        justifyItems="center"
+        gridTemplateColumns={["1fr", null, "1fr 1fr", "1fr 1fr 1fr"]}
+        gap={"10px"}
+      >
+        {[1, 2, 3, 4, 5, 6, 7, 8].map((card) => (
+          <NFTCard />
+        ))}
       </Box>
     </Layout>
   );

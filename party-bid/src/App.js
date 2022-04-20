@@ -2,12 +2,11 @@ import React, { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import { CreateTeam, Home, Team, Teams, Governance } from "./views";
 import { ChakraProvider } from "@chakra-ui/react";
-
+import theme from "./common/theme";
 export default function App() {
   return (
-    // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
     <>
-      <ChakraProvider>
+      <ChakraProvider theme={theme}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/team" element={<Team />} />
