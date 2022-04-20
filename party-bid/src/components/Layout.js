@@ -4,10 +4,10 @@ import { Navbar } from "./Navbar";
 export const Layout = ({ children }) => {
   return (
     <Box>
-      <Container maxW="container.xl">
+      <Box px="16px">
         <Navbar />
-        {children}
-      </Container>
+      </Box>
+      <Container maxW="container.lg">{children}</Container>
     </Box>
   );
 };
