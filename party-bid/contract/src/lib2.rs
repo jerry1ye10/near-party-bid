@@ -473,15 +473,6 @@ impl Welcome {
     }
 
     
-    
-
-
-
-    //TODO: Implement get functions for token stuff 
-    //Implement voting logic: Logic to calculate new price of NFT to be sold 
-    //Everytime the price changes it'll unlist and relist
-
-    
     #[payable]
     pub fn pay_money(&mut self) {
         // Get current invocation details
@@ -489,27 +480,16 @@ impl Welcome {
         let deposit = env::attached_deposit();
         let mut final_deposit = 0;
         let current_account = env::current_account_id();
-
-
-
-
-        // If the deposit was zero, we don't need to do anything and proceeding any further would be a no-op.
         if deposit == 0 {
             return;
         }
-
-        // Increment our money accrued
         self.money_accrued += deposit;
-
         if(self.money_accrued > self.money_goal){
             final_deposit = self.money_accrued - self.money_goal;
             self.money_accrued = self.money_goal;
             Promise::new(env::current_account_id()).transfer(final_deposit);
 
         }
-        //Check if money_goal is hit -> refund everything greater 
-
-        // Increment the account's record.
         self.records.insert(
             &account_id.to_string(),
             &(deposit-final_deposit + Welcome::get_record(self, &account_id.to_string())),
@@ -518,8 +498,6 @@ impl Welcome {
         let token_id = &self.nft_id;
 
         let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
-
-        // Check if we have reached enough funding to fulfill our goal.
         
         if self.money_accrued >= self.money_goal {
             ext_contract_paras::nft_buy(
@@ -532,9 +510,8 @@ impl Welcome {
             ).then(
                 ext_self::confirm_nft_callback(token_id.to_string(), current_account, 0, SINGLE_CALL_GAS * 3)
             );
-            //set nft_bought == true
         }
-        // TODO:refund if not bought
+        // TODO:refund NFT if not bought
         // TODO: refund if nft-id does not exist
     }
 }
