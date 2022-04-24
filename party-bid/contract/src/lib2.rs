@@ -35,6 +35,7 @@ pub struct Welcome {
     records: UnorderedMap<String, u128>,
     money_goal: u128,
     money_accrued: u128,
+    nft_account_id: String, 
     nft_id: String,
     token: FungibleToken,
     metadata: LazyOption<FungibleTokenMetadata>,
@@ -53,7 +54,7 @@ const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://
 
 impl Default for Welcome {
   fn default() -> Self {
-    Welcome::new("2000000000000000000000000".to_string(), "704".to_string(), "jerry".to_string(), "jerry".to_string())
+    Welcome::new("2000000000000000000000000".to_string(), "704".to_string(), "jerry".to_string(), "jerry".to_string(), "paras-token-v2.testnet".to_string())
   }
 }
 
@@ -138,7 +139,7 @@ impl Welcome{
 #[near_bindgen]
 impl Welcome {
     #[init]
-    pub fn new(money_goal: String, nft_id: String, name: String, symbol: String) -> Self {
+    pub fn new(money_goal: String, nft_id: String, name: String, symbol: String, nft_account_id: String) -> Self {
         assert!(!env::state_exists(), "Already, initialized");
         let owner_id = env::current_account_id();
         let metadata = FungibleTokenMetadata {
@@ -161,6 +162,7 @@ impl Welcome {
             nft_bought: false, 
             listing_available: false,
             nft_sold: false,
+            nft_account_id: nft_account_id
         };
         let total_supply : U128 = U128::from(money_goal.parse::<u128>().unwrap());
         this.token.internal_register_account(&owner_id);
@@ -283,7 +285,7 @@ impl Welcome {
     #[private] //Code to list on paras 
     fn approve_nft(&mut self){
         let current_account = env::current_account_id();
-            let nft_account_id: AccountId = "paras-token-v2.testnet".parse().unwrap();
+            let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
             log!("listing now! {}", current_account);
             // ext_contract_paras::nft_approve(
             //    self.nft_id.to_string(), //NEED TO CHANGE THIS 
@@ -313,7 +315,7 @@ impl Welcome {
         }
         if ((total_token_count as f64 / self.money_goal as f64) >= 0.75) {
             let current_account = env::current_account_id();
-            let nft_account_id: AccountId = "paras-token-v2.testnet".parse().unwrap();
+            let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
             log!("listing now! {}", current_account);
             self.listing_available = true; 
             //self.approve_nft();        // gas to attach
@@ -331,7 +333,7 @@ impl Welcome {
 
     #[payable]
     pub fn buy_nft(&mut self){
-        let nft_account_id: AccountId = "paras-token-v2.testnet".parse().unwrap();
+        let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
         assert!(self.listing_available);
         assert!(self.nft_bought);
         let price = self.get_sell_price();
@@ -441,7 +443,7 @@ impl Welcome {
         let current_account = env::current_account_id();
         let current_account2 = env::current_account_id();
         log!(env::signer_account_id());
-        let nft_account_id: AccountId = "paras-token-v2.testnet".parse().unwrap();
+        let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
         self.nft_id = token_id.clone();
         ext_contract_paras::nft_token(token_id, nft_account_id, 0, SINGLE_CALL_GAS).then(
             ext_self::confirm_nft_callback2(current_account2, 0, SINGLE_CALL_GAS)
@@ -518,7 +520,7 @@ impl Welcome {
 
         let token_id = &self.nft_id;
 
-        let nft_account_id: AccountId = "paras-token-v2.testnet".parse().unwrap();
+        let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
 
         // Check if we have reached enough funding to fulfill our goal.
         
