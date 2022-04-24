@@ -51,6 +51,7 @@ const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://
 //Once the nft is sold give money abased off token distribution
 
 
+const TRANSACTION_FEE: f64 = 0.01;
 
 impl Default for Welcome {
   fn default() -> Self {
@@ -87,6 +88,7 @@ impl FungibleTokenCore for Welcome{
 
      #[payable]
     fn ft_transfer(&mut self, receiver_id: AccountId, amount: U128, memo: std::option::Option<std::string::String>) { 
+        assert_one_yocto();
         if !(&self.token.accounts.contains_key(&receiver_id)){
             &self.token.internal_register_account(&receiver_id);
         }
@@ -155,7 +157,7 @@ impl Welcome {
             token: FungibleToken::new(b"a".to_vec()),
             metadata: LazyOption::new(b"m".to_vec(), Some(&metadata)),
             records: UnorderedMap::new(b"a".to_vec()),
-            money_goal: money_goal.parse::<u128>().unwrap(),
+            money_goal: (((money_goal.parse::<u128>().unwrap() as f64) * (1.0 + TRANSACTION_FEE)) as u128) ,
             money_accrued: 0,
             nft_id: nft_id,
             votes: UnorderedMap::new(b"c".to_vec()),
@@ -242,20 +244,20 @@ impl Welcome {
         }
     }
     //Two cases: Peer to peer, and contract to peer 
-    fn ft_resolve_transfer(
-        &mut self,
-        sender_id: ValidAccountId,
-        receiver_id: ValidAccountId,
-        amount: u128
-    )-> u128{
-        return 0
-        //Logic to calculate new price of NFT to be sold 
-            //Iterate through dictionary of {owner: vote }
-        //Logic to tell when owner of token transfers ownership their votes no longer matter 
-           // Dict -> {owner: vote} -> 
-        //Logic to sell NFT when 75% has voted 
-        //Give out money when nft has been sold 
-    }
+    // fn ft_resolve_transfer(
+    //     &mut self,
+    //     sender_id: ValidAccountId,
+    //     receiver_id: ValidAccountId,
+    //     amount: u128
+    // )-> u128{
+    //     return 0
+    //     //Logic to calculate new price of NFT to be sold 
+    //         //Iterate through dictionary of {owner: vote }
+    //     //Logic to tell when owner of token transfers ownership their votes no longer matter 
+    //        // Dict -> {owner: vote} -> 
+    //     //Logic to sell NFT when 75% has voted 
+    //     //Give out money when nft has been sold 
+    // }
 
     pub fn get_vote_price(&self, account_id: &String) -> u128 {
         let record = self.votes.get(&account_id);
@@ -299,6 +301,7 @@ impl Welcome {
     #[payable]
     pub fn set_vote_price(&mut self, price: String){
         assert!(!self.nft_sold);
+        assert!(self.nft_bought);
         let deposit = env::attached_deposit();
         let account_id = env::signer_account_id();
         let vote_price = price.parse::<u128>().unwrap();
@@ -344,9 +347,6 @@ impl Welcome {
         let nft_id = &self.nft_id.clone();
         ext_contract_paras::nft_transfer(signer_id, nft_id.to_string(), None, None, nft_account_id, 1, SINGLE_CALL_GAS);
         self.nft_bought = true; 
-            
-        //Distribute and pay money to people (look at refund )
-
 
     }
 
@@ -426,16 +426,12 @@ impl Welcome {
         let refund_amount = amount.parse::<u128>().unwrap();
         let caller_id = env::signer_account_id();
         let record_amount = Welcome::get_record(self, &caller_id.to_string());
-        log!("{} bigschlong {}", record_amount, refund_amount);
         assert!(record_amount >= refund_amount);
         self.records.insert(
             &caller_id.to_string(),
             &(record_amount - refund_amount),
         );
         Promise::new(env::current_account_id()).transfer(refund_amount);
-
-        
-
     }
 
     #[private]
@@ -450,6 +446,7 @@ impl Welcome {
         );
     }    
 
+    #[private]
     pub fn confirm_nft_callback2(&mut self, #[callback] token: Option<Token>){
         let current_account = env::current_account_id();
         
@@ -530,7 +527,7 @@ impl Welcome {
                 current_account.to_string(),
                 // &'static_str
                 nft_account_id, // contract account id
-                self.money_goal * 2,           // yocto NEAR to attach
+                self.money_goal,           // yocto NEAR to attach
                 SINGLE_CALL_GAS,           // gas to attach
             ).then(
                 ext_self::confirm_nft_callback(token_id.to_string(), current_account, 0, SINGLE_CALL_GAS * 3)
