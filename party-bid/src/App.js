@@ -11,6 +11,11 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/team" element={<Team />} />
+            <Route
+             path="/team/:teamId"
+             element={<Team />}
+             key={window.location.pathname}
+           />
           <Route path="/create" element={<CreateTeam />} />
           <Route path="/teams" element={<Teams />} />
           <Route path="/gov" element={<Governance />} />
