@@ -515,4 +515,3 @@ impl Welcome {
         // TODO: refund if nft-id does not exist
     }
 }
-
