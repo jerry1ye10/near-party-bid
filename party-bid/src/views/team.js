@@ -15,7 +15,7 @@ export const Team = (props) => {
   const [money_goal, set_money_goal] = useState(0.0);
   const [money_entered, set_money_entered] = useState(" ");
   const [transactionsData, setTransactions] = useState({});
-  const [contract, setContract] = useState({})
+  const [contract, setContract] = useState({});
 
   // when the user has not yet interacted with the form, disable the Button
   const [ButtonDisabled, setButtonDisabled] = React.useState(true);
@@ -33,18 +33,17 @@ export const Team = (props) => {
   }
   const history = useLocation();
 
-  const [teamId, setTeamId] = useState("")
+  const [teamId, setTeamId] = useState("");
 
-  function getTeamId(path){
-    //given pathname 
+  function getTeamId(path) {
+    //given pathname
     return path.split("/")[2];
   }
-
 
   React.useEffect(
     async () => {
       const id = getTeamId(window.location.pathname);
-      setTeamId(id)
+      setTeamId(id);
 
       const newContract = await new Contract(
         window.walletConnection.account(),
@@ -56,13 +55,13 @@ export const Team = (props) => {
             "get_record",
             "get_records",
           ],
-          changeMethods: ["pay_money"],
+          changeMethods: ["pay_money", "refund_money"],
         }
       );
 
-      setContract(newContract)
+      setContract(newContract);
 
-      console.log(await newContract.get_money_accrued())
+      console.log(await newContract.get_money_accrued());
 
       // in this case, we only care to query the contract when signed in
       if (window.walletConnection.isSignedIn()) {
@@ -94,19 +93,35 @@ export const Team = (props) => {
   // if not signed in, return early with sign-in prompt
 
   function send_money() {
-    const deposit = money_entered.concat("000000000000000000000000");
-    contract.pay_money(
-      {},
-      "300000000000000", // attached GAS (optional)
-      deposit // attached deposit in yoctoNEAR (optional)
-    );
+    refund_money();
+    // const deposit = money_entered.concat("00000000000000000000");
+    // contract
+    //   .pay_money(
+    //     {},
+    //     "300000000000000", // attached GAS (optional)
+    //     deposit // attached deposit in yoctoNEAR (optional)
+    //   )
+    //   .catch((e) => {
+    //     console.log(e);
+    //   });
+  }
+
+  function refund_money() {
+    const deposit = money_entered.concat("0000000000000000000");
+    contract
+      .refund_money(
+        { amount: deposit },
+        "300000000000000" // attached GAS (optional)
+      )
+      .catch((e) => {
+        console.log(e);
+      });
   }
 
   return (
     // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
     <Layout>
       <main>
-
         <h1 style={{ justifyContent: "center", display: "flex" }}>
           {money_accrued < money_goal ? <>Almost there </> : <> NFT Bought!</>}
         </h1>
