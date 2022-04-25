@@ -5,9 +5,11 @@ import moon from "../assets/moon_nft.jpg";
 import LoginView from "../components/LoginView";
 import { Layout } from "../components/Layout";
 import getConfig from "../config";
-import { Grid, Input, Button } from "@chakra-ui/react";
+import { Grid, Input, Button, Box, Image, Text } from "@chakra-ui/react";
+import { ShareIcon } from "../components/svgs";
 const { networkId } = getConfig("development");
-
+import NearLogo from "../assets/near_logo.svg";
+import { ContributionFeed } from "../components/ContributionFeed";
 export const Team = () => {
   const [money_accrued, set_money_accrued] = useState(0.0);
   const [money_goal, set_money_goal] = useState(0.0);
@@ -72,9 +74,91 @@ export const Team = () => {
   return (
     // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
     <Layout>
-      <main>
-        <LoginView />
-
+      <Box
+        display="flex"
+        mx={["50px", null, null, "unset"]}
+        flexDir={["column", null, null, "row"]}
+        mt="75px"
+      >
+        <Box>
+          <Box display="flex" justifyContent="center">
+            <Box
+              borderRadius="20px"
+              boxShadow="0px 0px 10px #D8D7E6"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+              width={["300px", "400px", "500px"]}
+              height={["300px", "400px", "500px"]}
+            >
+              <Image
+                objectFit="cover"
+                borderRadius="20px"
+                src={moon}
+                width={"93%"}
+                height={"93%"}
+              />
+            </Box>
+          </Box>
+          <Box
+            position="relative"
+            mt="10px"
+            sx={{ "& *": { borderRadius: "10px", height: "20px" } }}
+          >
+            <Box
+              position="absolute"
+              width="100%"
+              bg="linear-gradient(269.99deg, #FFF7E9 0.01%, #ECEBFB 101.44%)"
+            />
+            <Box
+              bg="#524E8A"
+              position="absolute"
+              width={`${0.2 * 100}%`}
+              transition="width 1s ease-in-out"
+            />
+          </Box>
+          <Box ml="-5px" mt="30px" display="flex" alignItems="center">
+            <Image
+              transform={{ transition: "all 1s ease" }}
+              _hover={{
+                filter: "drop-shadow(0px 0px 10px rgba(82, 78, 138, 0.21))",
+              }}
+              src={NearLogo}
+            />
+            <Text color="#9998A8" fontSize="20px">
+              Raised {money_accrued} / {money_goal} NEAR
+            </Text>
+          </Box>
+        </Box>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          width={["unset", null, null, "100%"]}
+          ml={["0px", null, null, "33px"]}
+        >
+          <Box>
+            <Text fontSize="24px" fontWeight="600">
+              Sana.TWICE
+            </Text>
+            <Box fontSize="14px" color="rgba(97,95,119,1)">
+              <Text>Buy Price: {money_goal} Near</Text>
+              <Text>{Object.keys(transactionsData).length} members</Text>
+            </Box>
+          </Box>
+          <Box>
+            <ShareIcon />
+          </Box>
+        </Box>
+      </Box>
+      <Box mt="42px">
+        <Text fontSize="28px" fontWeight="700">
+          Contributors
+        </Text>
+        <Box my="24px">
+          <ContributionFeed feed={[]} />
+        </Box>
+      </Box>
+      {/* <main>
         <h1 style={{ justifyContent: "center", display: "flex" }}>
           {money_accrued < money_goal ? <>Almost there </> : <> NFT Bought!</>}
         </h1>
@@ -141,7 +225,7 @@ export const Team = () => {
             Send Money
           </Button>
         </div>
-      </main>
+      </main> */}
     </Layout>
   );
 };

@@ -6,6 +6,7 @@
 .pnp.js
 
 /contracts/**/target/**/*
+/contract/target/**/*
 
 
 # build
