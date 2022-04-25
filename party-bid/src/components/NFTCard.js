@@ -1,9 +1,21 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Box, Image, Text } from "@chakra-ui/react";
 import StockNFT from "../assets/stock_nft.png";
 import NearLogo from "../assets/near_logo.svg";
+const statusObjectHandler = (status) => {
+  switch (status) {
+    case "Lost":
+      return { bg: "#FBEBEB", color: "#8A4E4E", text: "BLOC Lost" };
+    case "Won":
+      return { bg: "#F0FBEB", color: "#4F8A4E", text: "BLOC Won" };
+    case "Live":
+    default:
+      return { bg: "#ECEBFB", color: "#524E8A", text: "BLOC Live" };
+  }
+};
 
-export const NFTCard = () => {
+export const NFTCard = ({ status, moneyGoal, members, raised }) => {
+  const statusObject = useMemo(() => statusObjectHandler(status), [status]);
   return (
     <Box
       display="flex"
@@ -11,7 +23,12 @@ export const NFTCard = () => {
       bg="white"
       borderRadius="20px"
       p="13px"
-      border="1px solid #5F59BD"
+      filter="drop-shadow(0px 0px 10px #D8D7E6)"
+      transition={"all 0.2s ease-in"}
+      _hover={{
+        filter: "drop-shadow(0px 10px 20px #D8D7E6)",
+        transform: "translate3d(0px, -5px, 12px)",
+      }}
       width="fit-content"
     >
       <Image src={StockNFT} />
@@ -34,8 +51,8 @@ export const NFTCard = () => {
         lineHeight="15.39px"
         fontWeight="500"
       >
-        <Box>Buy price: 5 NEAR</Box>
-        <Box>6 members</Box>
+        <Box>Buy price: {moneyGoal} NEAR</Box>
+        <Box>{members} members</Box>
         <Box
           position="relative"
           mt="10px"
@@ -47,10 +64,16 @@ export const NFTCard = () => {
             height="6px"
             bg="linear-gradient(269.99deg, #FFF7E9 0.01%, #ECEBFB 101.44%)"
           />
-          <Box bg="#524E8A" position="absolute" width="12%" height="6px" />
+          <Box
+            bg="#524E8A"
+            position="absolute"
+            width={`${(raised / moneyGoal) * 100}%`}
+            transition="width 1s ease-in-out"
+            height="6px"
+          />
         </Box>
         <Text mt="10px" color="#9998A8" fontSize="10px">
-          Raised 0.5 / 5 NEAR
+          Raised {raised} / {moneyGoal} NEAR
         </Text>
         <Box
           mt="20px"
@@ -58,12 +81,13 @@ export const NFTCard = () => {
           mb="-13px"
           borderBottomRadius="20px"
           height="30px"
-          bg="#ECEBFB"
+          bg={statusObject.bg}
+          color={statusObject.color}
           display="flex"
           alignItems="center"
           justifyContent="center"
         >
-          <Text>Live BLOC</Text>
+          <Text>{statusObject.text}</Text>
         </Box>
       </Box>
     </Box>

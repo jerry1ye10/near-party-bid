@@ -1,18 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { login, logout } from "../utils";
-import { Button } from "@chakra-ui/react";
+import { Button, Text, Box } from "@chakra-ui/react";
+import { BiWallet } from "react-icons/bi";
 
 export default function LoginView() {
   if (window.walletConnection.isSignedIn()) {
     return (
-      <Button className="link" style={{ float: "right" }} onClick={login}>
-        Sign In
+      <Button variant="primary" style={{ float: "right" }} onClick={login}>
+        <Box display={["none", null, "unset"]}>
+          <Text>Connect Wallet</Text>
+        </Box>
+        <Box display={["unset", null, "none"]}>
+          <BiWallet size={"20px"} />
+        </Box>
       </Button>
     );
   }
   return (
-    <Button className="link" style={{ float: "right" }} onClick={logout}>
-      Sign out
+    <Button variant="outline" style={{ float: "right" }} onClick={logout}>
+      <Box display={["none", null, "unset"]}>
+        <Text>Disconnect Wallet</Text>
+      </Box>
+      <Box display={["unset", null, "none"]}>
+        <BiWallet size={"20px"} />
+      </Box>
     </Button>
   );
 }
