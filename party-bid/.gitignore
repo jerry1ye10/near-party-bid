@@ -5,9 +5,9 @@
 /.pnp
 .pnp.js
 
+/contracts/**/target/**/*
 /contract/target/**/*
 
-party-bid/contract/target/**/*.*
 
 # build
 /out
