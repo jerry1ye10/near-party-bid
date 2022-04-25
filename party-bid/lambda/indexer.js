@@ -27,6 +27,7 @@ const post = (payload) => new Promise((resolve, reject) => {
 // This function is responsible for taking http post requests, validating the contract submitted matches
 // the correct hash for a valid party contract, and indexing them in a dynamodb table if they are valid.
 exports.handler = async (event) => {
+    let json = JSON.parse(event.body)
     const
         body= {
             "jsonrpc": "2.0",
@@ -35,7 +36,7 @@ exports.handler = async (event) => {
             "params": {
                 "request_type": "view_code",
                 "finality": "final",
-                "account_id": event.contract_id
+                "account_id": json.contract_id
             }
         };
 
@@ -66,7 +67,7 @@ exports.handler = async (event) => {
     const params = {
         TableName: "Parties",
         Item: {
-            'Address' : {S: event.contract_id}
+            'Address' : {S: json.contract_id}
         }
     }
 
