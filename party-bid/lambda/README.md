@@ -1,6 +1,9 @@
 # 🌤️ Lambda Backend Functions
 These functions are hosted in AWS Lambda and are responsible for the majority of our backend functionality.
 
+Postman JSON documentation available here:
+https://www.getpostman.com/collections/99a739e41fcad4b0ddb0
+
 ## 📜 Indexer
 The indexer function is responsible for indexing contracts submitted by address
 by the client when a contract is created. It matches the contract code hash and ensures

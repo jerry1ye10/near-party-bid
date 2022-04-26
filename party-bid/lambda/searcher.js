@@ -38,9 +38,3 @@ exports.handler = async (event) => {
     console.log(thing);
     return thing;
 }
-
-exports.handler({
-    body: JSON.stringify({
-        search: "memei"
-    })
-})
