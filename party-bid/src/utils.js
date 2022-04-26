@@ -16,7 +16,6 @@ export async function initContract() {
   // Initializing Wallet based Account. It can work with NEAR testnet wallet that
   // is hosted at https://wallet.testnet.near.org
   window.walletConnection = new WalletConnection(near);
-
   // Getting the Account ID. If still unauthorized, it's just empty string
   window.accountId = window.walletConnection.getAccountId();
 
@@ -25,7 +24,7 @@ export async function initContract() {
     "paras-token-v2.testnet",
     {
       // name of contract you're connecting to
-      viewMethods: ["nft_get_series_price"], // view methods do not change state but usually return a value
+      viewMethods: ["nft_get_series_price", "nft_token"], // view methods do not change state but usually return a value
     }
   );
   window.contract = await new Contract(

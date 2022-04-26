@@ -40,7 +40,7 @@ const { code } = sh.exec(buildCmd);
 // When running commands like `near deploy`, near-cli looks for a contract at
 // <CURRENT_DIRECTORY>/out/main.wasm
 if (code === 0 && calledFromDir !== __dirname) {
-  console.log("Rust build succeeded, now linking...")
+  console.log("Rust build succeeded, now linking...");
   const linkDir = `${calledFromDir}/out`;
   const link = `${calledFromDir}/out/main.wasm`;
   const packageName = require("fs")

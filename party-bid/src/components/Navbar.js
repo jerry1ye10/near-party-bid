@@ -1,15 +1,19 @@
 import React from "react";
-import { Box, Button, Text } from "@chakra-ui/react";
+import { Box, Button, Text, useDisclosure } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { TITLE } from "../common/constants";
 import LoginView from "./LoginView";
+import { CreateTeamModal } from "./CreateBlocModal";
 export const Navbar = () => {
   const pages = [
-    { name: "+ Create Team", url: "/create" },
     { name: "All Teams", url: "/teams" },
     { name: "Governance", url: "/gov" },
   ];
-
+  const {
+    isOpen: isCreateBlockModalOpen,
+    onOpen: onCreateBlocOpen,
+    onClose: onCreateBlocClose,
+  } = useDisclosure();
   return (
     <Box
       pt="25px"
@@ -35,16 +39,14 @@ export const Navbar = () => {
         sx={{ columnGap: ["4px", null, "25px"] }}
         alignItems="center"
       >
-        <Link to={pages[0].url}>
-          <Button
-            display={["box", null, "none"]}
-            colorScheme="black"
-            fontWeight="400"
-            variant="link"
-          >
-            {pages[0].name}
-          </Button>
-        </Link>
+        <Button
+          colorScheme="black"
+          fontWeight="400"
+          variant="link"
+          onClick={onCreateBlocOpen}
+        >
+          +Create a Team
+        </Button>
         {pages.map((page, idx) => (
           <Link key={idx} to={page.url}>
             <Button
@@ -59,6 +61,10 @@ export const Navbar = () => {
         ))}
         <LoginView />
       </Box>
+      <CreateTeamModal
+        isOpen={isCreateBlockModalOpen}
+        onClose={onCreateBlocClose}
+      />
     </Box>
   );
 };

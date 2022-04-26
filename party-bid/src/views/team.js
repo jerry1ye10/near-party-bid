@@ -1,5 +1,5 @@
 import "regenerator-runtime/runtime";
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { login, logout } from "../utils";
 import moon from "../assets/moon_nft.jpg";
 import LoginView from "../components/LoginView";
@@ -19,6 +19,31 @@ export const Team = () => {
   const [transactionsData, setTransactions] = useState({});
   const [contract, setContract] = useState({});
 
+  // format
+  /***
+    {
+    "token_id": "437:1",
+    "owner_id": "ahuiheo.testnet",
+    "metadata": {
+        "title": "Jojo is mad #1",
+        "description": null,
+        "media": "bafkreifxnl5cyaxru4n2fabd7paoc4qaq37xspyjogjji7j6nvyd5mil5a",
+        "media_hash": null,
+        "copies": 10000,
+        "issued_at": "1648221315015699420",
+        "expires_at": null,
+        "starts_at": null,
+        "updated_at": null,
+        "extra": null,
+        "reference": "bafkreih6dtj3wfff6cllrgq3vvzynn727hxedvstnskuecgow62idatrw4",
+        "reference_hash": null
+    },
+    "approved_account_ids": {
+        "paras-marketplace-v2.testnet": 6
+    }
+   */
+  const [NFTMetadata, setNFTMetadata] = useState(null);
+
   // when the user has not yet interacted with the form, disable the Button
   const [ButtonDisabled, setButtonDisabled] = React.useState(true);
 
@@ -27,11 +52,11 @@ export const Team = () => {
   };
 
   function convert_yocto_to_near(float) {
-    return roundToHundredth(float / 1000000000000000000000000);
+    return roundToHundredth(float / 10 ** 24);
   }
 
   function convert_near_to_yocto(near_val) {
-    return roundToHundredth(near_val * 1000000000000000000000000);
+    return roundToHundredth(near_val * 10 ** 24);
   }
   const history = useLocation();
 
@@ -41,6 +66,11 @@ export const Team = () => {
     //given pathname
     return path.split("/")[2];
   }
+
+  const nftImage = useMemo(
+    () => `https://ipfs.fleek.co/ipfs/${NFTMetadata?.metadata?.media}`,
+    [NFTMetadata]
+  );
 
   React.useEffect(
     async () => {
@@ -56,14 +86,20 @@ export const Team = () => {
             "get_money_goal",
             "get_record",
             "get_records",
+            "get_nft_Id",
           ],
           changeMethods: ["pay_money", "refund_money"],
         }
       );
 
       setContract(newContract);
-
-      console.log(await newContract.get_money_accrued());
+      const token_id = await newContract.get_nft_Id();
+      console.log(token_id);
+      const response = await window.parasContract.nft_token({
+        token_id: token_id.includes(":") ? `${token_id}` : `${token_id}:1`,
+      });
+      console.log(response);
+      setNFTMetadata(response);
 
       // in this case, we only care to query the contract when signed in
       if (window.walletConnection.isSignedIn()) {
@@ -75,7 +111,6 @@ export const Team = () => {
           set_money_goal(convert_yocto_to_near(money_goal) + 1);
         });
         newContract.get_records().then((records) => {
-          console.log("hello");
           let transactions = {};
           for (let i = 0; i < records[0].length; i++) {
             transactions[records[0][i]] = records[1][i];
@@ -95,17 +130,19 @@ export const Team = () => {
   // if not signed in, return early with sign-in prompt
 
   function send_money() {
-    refund_money();
-    // const deposit = money_entered.concat("00000000000000000000");
-    // contract
-    //   .pay_money(
-    //     {},
-    //     "300000000000000", // attached GAS (optional)
-    //     deposit // attached deposit in yoctoNEAR (optional)
-    //   )
-    //   .catch((e) => {
-    //     console.log(e);
-    //   });
+    // refund_money();
+    const deposit = BigInt(parseInt(money_entered) * 10 ** 24);
+    console.log(parseFloat(deposit, 10));
+    console.log(deposit.toString());
+    contract
+      .pay_money(
+        {},
+        "300000000000000", // attached GAS (optional)
+        deposit.toString() // attached deposit in yoctoNEAR (optional)
+      )
+      .catch((e) => {
+        console.log(e);
+      });
   }
 
   function refund_money() {
@@ -143,7 +180,7 @@ export const Team = () => {
               <Image
                 objectFit="cover"
                 borderRadius="20px"
-                src={moon}
+                src={nftImage ? nftImage : moon}
                 width={"93%"}
                 height={"93%"}
               />
@@ -177,25 +214,50 @@ export const Team = () => {
             <Text color="#9998A8" fontSize="20px">
               Raised {money_accrued} / {money_goal} NEAR
             </Text>
+            {money_goal ? (
+              <Text ml="4px">({(money_accrued / money_goal) * 100}%)</Text>
+            ) : (
+              <></>
+            )}
           </Box>
         </Box>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          width={["unset", null, null, "100%"]}
-          ml={["0px", null, null, "33px"]}
-        >
-          <Box>
-            <Text fontSize="24px" fontWeight="600">
-              Sana.TWICE
-            </Text>
-            <Box fontSize="14px" color="rgba(97,95,119,1)">
-              <Text>Buy Price: {money_goal} Near</Text>
-              <Text>{Object.keys(transactionsData).length} members</Text>
+        <Box ml={["0px", null, null, "33px"]}>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            width={["unset", null, null, "100%"]}
+          >
+            <Box>
+              <Text fontSize="24px" fontWeight="600">
+                {NFTMetadata?.metadata.title ?? "Loading..."}
+              </Text>
+              <Box fontSize="14px" color="rgba(97,95,119,1)">
+                <Text>Buy Price: {money_goal} Near</Text>
+                <Text>{Object.keys(transactionsData).length} members</Text>
+              </Box>
+            </Box>
+            <Box>
+              <ShareIcon />
             </Box>
           </Box>
-          <Box>
-            <ShareIcon />
+          <Box mt="24px" display="flex">
+            <Input
+              type="text"
+              value={money_entered}
+              onChange={(e) => {
+                set_money_entered(e.target.value);
+              }}
+            />
+            <Button
+              style={{
+                justifyContent: "center",
+                display: "flex",
+                alignContent: "center",
+              }}
+              onClick={send_money}
+            >
+              Send Money
+            </Button>
           </Box>
         </Box>
       </Box>
@@ -204,6 +266,15 @@ export const Team = () => {
           Contributors
         </Text>
         <Box my="24px">
+          <ul style={{ marginTop: "5px", marginBottom: "5px" }}>
+            {Object.keys(transactionsData).map(function (key) {
+              return (
+                <li>
+                  {key}: {convert_yocto_to_near(transactionsData[key])} Near
+                </li>
+              );
+            })}
+          </ul>
           <ContributionFeed feed={[]} />
         </Box>
       </Box>
@@ -255,25 +326,7 @@ export const Team = () => {
           </ul>
         </div>
 
-        <div style={{ justifyContent: "center", display: "flex" }}>
-          <Input
-            type="text"
-            value={money_entered}
-            onChange={(e) => {
-              set_money_entered(e.target.value);
-            }}
-          />
-          <Button
-            style={{
-              justifyContent: "center",
-              display: "flex",
-              alignContent: "center",
-            }}
-            onClick={send_money}
-          >
-            Send Money
-          </Button>
-        </div>
+    
       </main> */}
     </Layout>
   );

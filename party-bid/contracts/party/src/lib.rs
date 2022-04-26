@@ -21,9 +21,6 @@ use near_sdk::{
 //Add panic on default later
 use near_contract_standards::non_fungible_token::{Token, TokenId};
 
-
-
-
 setup_alloc!();
 
 // Structs in Rust are similar to other languages, and may include impl keyword as shown below
@@ -217,6 +214,9 @@ impl Welcome {
 
     pub fn get_money_goal(self) -> u128 {
         return self.money_goal;
+    }
+    pub fn get_nft_Id(self) -> String {
+        return self.nft_id;
     }
 
     pub fn get_records(self) -> (Vec<String>, Vec<u128>) {
@@ -484,17 +484,14 @@ impl Welcome {
             return;
         }
         self.money_accrued += deposit;
-        if(self.money_accrued > self.money_goal){
+        if(self.money_accrued >= self.money_goal){
             final_deposit = self.money_accrued - self.money_goal;
             self.money_accrued = self.money_goal;
             Promise::new(env::current_account_id()).transfer(final_deposit);
-
+            // figure out refund 
         }
-        self.records.insert(
-            &account_id.to_string(),
-            &(deposit-final_deposit + Welcome::get_record(self, &account_id.to_string())),
-        );
-
+        log!("test {} {} {} {} {}", deposit, final_deposit, self.money_accrued, self.money_goal, deposit-final_deposit );
+       
         let token_id = &self.nft_id;
 
         let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
@@ -506,11 +503,17 @@ impl Welcome {
                 // &'static_str
                 nft_account_id, // contract account id
                 self.money_goal,           // yocto NEAR to attach
-                SINGLE_CALL_GAS,           // gas to attach
+                SINGLE_CALL_GAS*2,           // gas to attach
             ).then(
                 ext_self::confirm_nft_callback(token_id.to_string(), current_account, 0, SINGLE_CALL_GAS * 3)
             );
         }
+
+        self.records.insert(
+            &account_id.to_string(),
+            &(deposit-final_deposit + Welcome::get_record(self, &account_id.to_string())),
+        );
+
         // TODO:refund NFT if not bought
         // TODO: refund if nft-id does not exist
     }

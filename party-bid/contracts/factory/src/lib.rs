@@ -12,7 +12,8 @@ pub struct DeployArgs {
     money_goal: String,
     nft_id: String,
     name: String, 
-    symbol: String
+    symbol: String,
+    nft_account_id: String,
 }
 
 #[near_bindgen]
@@ -27,24 +28,24 @@ impl Default for Factory {
   }
 }
 
-const CODE: &[u8] = include_bytes!("./greeter.wasm");
+const CODE: &[u8] = include_bytes!("./party.wasm");
 
 
 
 #[near_bindgen]
 impl Factory {
 
-    pub fn deploy(self, money_goal: String, nft_id: String ) -> String {
-        let mut account_id: String = "dev-1650291992643-60218357254228".to_string();
-        account_id.push_str(&nft_id);
-        let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id, name: "jerry".to_string(), symbol: "jerry".to_string()};
+    pub fn deploy(self, money_goal: String, nft_id: String, current_time: String ) -> String {
+        let mut account_id: String = "dev-party-12345678912345678".to_string();
+        account_id.push_str(&current_time);
+        let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id, name: "jerry".to_string(), symbol: "jerry".to_string(), nft_account_id: "paras-token-v2.testnet".to_string()};
 
-        let gas: Gas = 250_000_000_000_000.into();
+        let gas: Gas = 75000000000000.into();
 
         Promise::new(account_id.parse().unwrap())
             .create_account()
             .add_full_access_key(env::signer_account_pk())
-            .transfer(1_000_000_000_000_000_000_000_0000)
+            .transfer(2_000_000_000_000_000_000_000_0000)
             .deploy_contract(CODE.to_vec())
             .function_call(
                 "new".to_string(),

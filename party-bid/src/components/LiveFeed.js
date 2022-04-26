@@ -37,6 +37,7 @@ export const LiveFeed = ({ feed }) => {
       >
         {["Transaction", "BLOC Member", "Amount", "BLOC"].map((text, idx) => (
           <Text
+            key={idx}
             position="sticky"
             top="0px"
             pt="26px"
@@ -51,7 +52,7 @@ export const LiveFeed = ({ feed }) => {
 
         {feed.map((item, idx) => {
           return (
-            <>
+            <React.Fragment key={idx}>
               <Box
                 fontWeight="700"
                 display="flex"
@@ -104,7 +105,7 @@ export const LiveFeed = ({ feed }) => {
               >
                 {item.blocName}
               </Text>
-            </>
+            </React.Fragment>
           );
         })}
       </Box>

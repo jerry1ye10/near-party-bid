@@ -11,10 +11,12 @@ import { CreateTeamModal } from "../components/CreateBlocModal";
 import { Coin1, Coin2 } from "../components/svgs";
 import { useSpring, a, to } from "react-spring";
 export const Home = () => {
-  const { isCreateBlockModalOpen, onCreateBlocOpen, onCreateBlocClose } =
-    useDisclosure();
+  const {
+    isOpen: isCreateBlockModalOpen,
+    onOpen: onCreateBlocOpen,
+    onClose: onCreateBlocClose,
+  } = useDisclosure();
   const [{ st }, api] = useSpring(() => ({ st: 0 }));
-
   const [scrollTop, setScrollTop] = useState(0);
   const [scrolling, setScrolling] = useState(false);
   useEffect(() => {
@@ -25,14 +27,12 @@ export const Home = () => {
       if (scrolling) {
         api.start({ st: e.target.documentElement.scrollTop / 20 });
       } else {
-        api.cancel();
+        api.set();
       }
     };
     window.addEventListener("scroll", onScroll);
-    console.log(st.toJSON());
     return () => window.removeEventListener("scroll", onScroll);
   }, [scrollTop]);
-  console.log(scrolling, scrollTop);
 
   const AnimatedBox = a(Box);
   const ref = useRef(null);

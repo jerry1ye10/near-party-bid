@@ -56,7 +56,7 @@ export const Coin1 = () => (
         filterUnits="userSpaceOnUse"
         colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feGaussianBlur in="BackgroundImage" stdDeviation="10" />
         <feComposite
           in2="SourceAlpha"
@@ -79,7 +79,7 @@ export const Coin1 = () => (
         filterUnits="userSpaceOnUse"
         colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
@@ -210,7 +210,7 @@ export const Coin2 = () => (
         filterUnits="userSpaceOnUse"
         colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feBlend
           mode="normal"
           in="SourceGraphic"
@@ -231,7 +231,7 @@ export const Coin2 = () => (
         filterUnits="userSpaceOnUse"
         colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feGaussianBlur in="BackgroundImage" stdDeviation="10" />
         <feComposite
           in2="SourceAlpha"
@@ -272,7 +272,7 @@ export const Coin2 = () => (
         filterUnits="userSpaceOnUse"
         colorInterpolationFilters="sRGB"
       >
-        <feFlood flood-opacity="0" result="BackgroundImageFix" />
+        <feFlood floodOpacity="0" result="BackgroundImageFix" />
         <feColorMatrix
           in="SourceAlpha"
           type="matrix"
