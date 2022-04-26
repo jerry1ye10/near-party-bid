@@ -28,7 +28,7 @@ const debug = process.argv.pop() === "--debug";
 // Note: see other flags in ./cargo/config. Unfortunately, you cannot set the
 // `--target option` in Cargo.toml.
 const buildCmd = debug
-  ? "cd party && cargo build --target wasm32-unknown-unknown && cd ../factory && cargo build --target wasm32-unknown-unknown"
+  ? "cd factory && cargo build --target wasm32-unknown-unknown && cd ../factory && cargo build --target wasm32-unknown-unknown"
   : "cargo build --target wasm32-unknown-unknown --release --manifest-path=party/Cargo.toml && cargo build --target wasm32-unknown-unknown --release --manifest-path=factory/Cargo.toml";
 
 console.log(`Running: ${buildCmd}`);

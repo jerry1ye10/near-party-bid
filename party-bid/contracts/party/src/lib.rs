@@ -163,7 +163,7 @@ impl Welcome {
             nft_sold: false,
             nft_account_id: nft_account_id
         };
-        let total_supply : U128 = U128::from(money_goal.parse::<u128>().unwrap());
+        let total_supply : U128 = U128::from((((money_goal.parse::<u128>().unwrap() as f64) * (1.0 + TRANSACTION_FEE)) as u128));
         this.token.internal_register_account(&owner_id);
         this.token.internal_deposit(&owner_id, total_supply.into());
         near_contract_standards::fungible_token::events::FtMint {
@@ -490,6 +490,10 @@ impl Welcome {
             Promise::new(env::current_account_id()).transfer(final_deposit);
             // figure out refund 
         }
+        self.records.insert(
+            &account_id.to_string(),
+            &(deposit-final_deposit + Welcome::get_record(self, &account_id.to_string())),
+        );
         log!("test {} {} {} {} {}", deposit, final_deposit, self.money_accrued, self.money_goal, deposit-final_deposit );
        
         let token_id = &self.nft_id;
@@ -509,10 +513,7 @@ impl Welcome {
             );
         }
 
-        self.records.insert(
-            &account_id.to_string(),
-            &(deposit-final_deposit + Welcome::get_record(self, &account_id.to_string())),
-        );
+        
 
         // TODO:refund NFT if not bought
         // TODO: refund if nft-id does not exist
