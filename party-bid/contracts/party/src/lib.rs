@@ -60,6 +60,7 @@ impl Default for Welcome {
 pub trait ExtSelf {
     fn confirm_nft_callback(nft_id: String, #[callback] token_id : TokenId);
     fn confirm_nft_callback2(#[callback] token: Option<Token>);
+    fn confirm_nft_price_callback(#[callback] price: String);
 }
 
 #[near_bindgen]
@@ -393,10 +394,36 @@ impl Welcome {
         }
     }
 
-   
+    //TODO: 
+    //Write a function that will refund out money to people using records (just take 1%)
+    //
+//  Need a function to run this on the contract 
+// - Will call when you're about to pay 
+// - Backend will also default call it 
+// - Need to take a fee to account for the gas price of this OR force users to call this... 
+// - Eh I'd rather just take a fee 
+
+    #[payable]
+    pub fn refund_party(&mut self){
+        assert_one_yocto();
+        assert!(!self.nft_bought);
+        let nft = &self.nft_id;
+        let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
+        ext_contract_paras::nft_get_series_price(nft.to_string(), nft_account_id, 0, SINGLE_CALL_GAS ).then(
+            ext_self::confirm_nft_price_callback(env::current_account_id(), 0, SINGLE_CALL_GAS)
+        );
+
+    //      const response = await window.parasContract.nft_get_series_price({
+    //   token_series_id: nftId,
+    // });
+        //Check for price of the NFT 
+        //delete the contract Promise::new(contract_id).delete_account(beneficiary_id);
+
+    }
 
 
-    //TODO
+
+
     #[private]
     pub fn airdrop_tokens(&mut self){
         let sender_id = env::current_account_id();
@@ -444,7 +471,26 @@ impl Welcome {
         ext_contract_paras::nft_token(token_id, nft_account_id, 0, SINGLE_CALL_GAS).then(
             ext_self::confirm_nft_callback2(current_account2, 0, SINGLE_CALL_GAS)
         );
-    }    
+    }   
+    
+    #[private]
+    pub fn confirm_nft_price_callback(&mut self, #[callback] price: String){
+        log!(price);
+        let current_price = (((price.parse::<u128>().unwrap() as f64) * (1.0 + TRANSACTION_FEE)) as u128); 
+        if current_price != self.money_goal{
+            for key in self.records.keys() {
+                let copyKey: AccountId = key.clone().parse().unwrap();
+                let refund_amount = self.records.get(&key);
+                match refund_amount {
+                    Some(refund) => {
+                        Promise::new(copyKey).transfer(((refund as f64) * 0.99) as u128 ); //Takes a 1% transaction fee to account for gas
+                    }
+                    None =>  log!("no valid value"),
+                }
+                
+            }
+        }
+    }
 
     #[private]
     pub fn confirm_nft_callback2(&mut self, #[callback] token: Option<Token>){
@@ -487,8 +533,7 @@ impl Welcome {
         if(self.money_accrued >= self.money_goal){
             final_deposit = self.money_accrued - self.money_goal;
             self.money_accrued = self.money_goal;
-            Promise::new(env::current_account_id()).transfer(final_deposit);
-            // figure out refund 
+            Promise::new(env::signer_account_id()).transfer(final_deposit);
         }
         self.records.insert(
             &account_id.to_string(),
