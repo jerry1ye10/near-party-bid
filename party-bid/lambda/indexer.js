@@ -27,7 +27,29 @@ const post = (payload) => new Promise((resolve, reject) => {
 // This function is responsible for taking http post requests, validating the contract submitted matches
 // the correct hash for a valid party contract, and indexing them in a dynamodb table if they are valid.
 exports.handler = async (event) => {
+    // Ensure we have a body
+    if (!event.body) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                error: 'Bad Request',
+                message: 'No body found in request'
+            })
+        }
+    }
+
     let json = JSON.parse(event.body)
+
+    // Ensure the json contains contract_id and team_id
+    if (!json.contract_id || !json.team_id) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                message: 'Missing contract_id or team_id'
+            })
+        }
+    }
+
     const
         body= {
             "jsonrpc": "2.0",
@@ -63,20 +85,40 @@ exports.handler = async (event) => {
     }
 
     // If we've made it this far, then the contract is valid, and we can add it to dynamodb.
-    // If it already exists, then we'll just overwrite it and it's no big deal.
+    // However, ensure we're not adding a duplicate contract.
     const params = {
         TableName: "Parties",
         Item: {
-            'Address' : {S: json.contract_id}
+            'Address' : {S: json.contract_id},
+            'Team' : {S: json.team_id}
+        },
+        ConditionExpression: 'attribute_not_exists(Address)'
+    }
+
+    await ddb.putItem(params, function(err, data) {
+        if (err) {
+            // If the ConditionalCheckFailedException is thrown, then the item already exists
+            if (err.code === 'ConditionalCheckFailedException') {
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({
+                        message: 'Duplicate contract'
+                    })
+                }
+            }
+            return {
+                statusCode: 500,
+                body: JSON.stringify({
+                    message: 'Internal Server Error'
+                })
+            }
+        } else {
+            return {
+                statusCode: 200,
+                body: JSON.stringify({
+                    message: 'Contract Indexed'
+                })
+            }
         }
-    }
-
-    await ddb.putItem(params).promise();
-
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            message: 'Contract Indexed'
-        })
-    }
+    });
 };
