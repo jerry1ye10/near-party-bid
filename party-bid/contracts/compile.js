@@ -27,13 +27,44 @@ const debug = process.argv.pop() === "--debug";
 // Let's set a variable to track whether `--debug` was used.
 // Note: see other flags in ./cargo/config. Unfortunately, you cannot set the
 // `--target option` in Cargo.toml.
-const buildCmd = debug
+var buildCmd = debug
+  ? "cd party && cargo build --target wasm32-unknown-unknown && cd ../party && cargo build --target wasm32-unknown-unknown"
+  : "cargo build --target wasm32-unknown-unknown --release --manifest-path=party/Cargo.toml && cargo build --target wasm32-unknown-unknown --release --manifest-path=party/Cargo.toml";
+
+console.log(`Running: ${buildCmd}`);
+// Execute the build command, storing exit code for later use
+var { code } = sh.exec(buildCmd);
+
+// Assuming this is compiled from the root project directory, link the compiled
+// contract to the `out` folder –
+// When running commands like `near deploy`, near-cli looks for a contract at
+// <CURRENT_DIRECTORY>/out/main.wasm
+if (code === 0 && calledFromDir !== __dirname) {
+  console.log("Rust build succeeded, now linking...");
+  const linkDir = `${calledFromDir}/out`;
+  const link = `${__dirname}/factory/src/party.wasm`;
+  const packageName = require("fs")
+    .readFileSync(`${__dirname}/party/Cargo.toml`)
+    .toString()
+    .match(/name = "([^"]+)"/)[1];
+  const outFile = `${__dirname}/party/target/wasm32-unknown-unknown/${
+    debug ? "debug" : "release"
+  }/${packageName}.wasm`;
+  sh.mkdir("-p", linkDir);
+  //sh.rm("-f", link);
+  //fixes #831: copy-update instead of linking .- sometimes sh.ln does not work on Windows
+  //print copying outfile to link
+  console.log(`Copying ${outFile} to ${link}`);
+  sh.cp("-u", outFile, link);
+}
+
+buildCmd = debug
   ? "cd factory && cargo build --target wasm32-unknown-unknown && cd ../factory && cargo build --target wasm32-unknown-unknown"
   : "cargo build --target wasm32-unknown-unknown --release --manifest-path=party/Cargo.toml && cargo build --target wasm32-unknown-unknown --release --manifest-path=factory/Cargo.toml";
 
 console.log(`Running: ${buildCmd}`);
 // Execute the build command, storing exit code for later use
-const { code } = sh.exec(buildCmd);
+var { code } = sh.exec(buildCmd);
 
 // Assuming this is compiled from the root project directory, link the compiled
 // contract to the `out` folder –
@@ -57,6 +88,5 @@ if (code === 0 && calledFromDir !== __dirname) {
   console.log(`Copying ${outFile} to ${link}`);
   sh.cp("-u", outFile, link);
 }
-
 // exit script with the same code as the build command
 process.exit(code);
