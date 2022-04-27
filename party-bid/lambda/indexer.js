@@ -1,4 +1,4 @@
-const https = require('https'); // or https
+const https = require('https');
 var AWS = require('aws-sdk');
 AWS.config.update({region: 'us-east-1'});
 var ddb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
@@ -65,25 +65,27 @@ exports.handler = async (event) => {
             }
         };
 
-    let resp = await post(body);
-    // If the resp contains a key 'error' then the contract is invalid
-    if (!DEBUG_MODE && resp.error) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                message: 'Invalid contract'
-            })
+    if (!DEBUG_MODE) {
+        let resp = await post(body);
+        // If the resp contains a key 'error' then the contract is invalid
+        if (resp.error) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    message: 'Invalid contract'
+                })
+            }
         }
-    }
 
-    // Now we know that the contract exists, check it's code hash located in resp.result.hash
-    // If it matches the hash of the party contract, then we can index it in dynamodb
-    if (!DEBUG_MODE && resp.result.hash !== process.env.partyhash) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({
-                message: 'Invalid contract'
-            })
+        // Now we know that the contract exists, check it's code hash located in resp.result.hash
+        // If it matches the hash of the party contract, then we can index it in dynamodb
+        if (resp.result.hash !== process.env.partyhash) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    message: 'Invalid contract'
+                })
+            }
         }
     }
 
@@ -98,30 +100,30 @@ exports.handler = async (event) => {
         ConditionExpression: 'attribute_not_exists(Address)'
     }
 
-    await ddb.putItem(params, function(err, data) {
-        if (err) {
-            // If the ConditionalCheckFailedException is thrown, then the item already exists
-            if (err.code === 'ConditionalCheckFailedException') {
-                return {
-                    statusCode: 400,
-                    body: JSON.stringify({
-                        message: 'Duplicate contract'
-                    })
-                }
+    try {
+        let res = await ddb.putItem(params).promise();
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: 'Contract Indexed'
+            })
+        }
+    }
+    catch (err) {
+        if (err.code === 'ConditionalCheckFailedException') {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    message: 'Duplicate contract'
+                })
             }
+        } else {
             return {
                 statusCode: 500,
                 body: JSON.stringify({
                     message: 'Internal Server Error'
                 })
             }
-        } else {
-            return {
-                statusCode: 200,
-                body: JSON.stringify({
-                    message: 'Contract Indexed'
-                })
-            }
         }
-    });
+    }
 };
