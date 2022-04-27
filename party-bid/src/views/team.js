@@ -3,24 +3,55 @@ import React, { useState, useMemo } from "react";
 import { login, logout } from "../utils";
 import moon from "../assets/moon_nft.jpg";
 import LoginView from "../components/LoginView";
-import { connect, Contract, keyStores, WalletConnection } from "near-api-js";
+import {
+  connect,
+  Contract,
+  keyStores,
+  WalletConnection,
+  utils,
+} from "near-api-js";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import getConfig from "../config";
-import { Grid, Input, Button, Box, Image, Text } from "@chakra-ui/react";
-import { ShareIcon } from "../components/svgs";
+import {
+  Grid,
+  Input,
+  Button,
+  Box,
+  Image,
+  Text,
+  Tooltip,
+  useToast,
+  SkeletonCircle,
+  SkeletonText,
+  Skeleton,
+  Badge,
+} from "@chakra-ui/react";
+import { ShareIcon, ShareIconHover, ShoppingCart } from "../components/svgs";
 const { networkId } = getConfig("development");
 import NearLogo from "../assets/near_logo.svg";
+import {
+  truncateAddress,
+  safeFormatNearAmount,
+  safeParseNearAmount,
+  roundToFourDec,
+} from "../common/utils";
 import { ContributionFeed } from "../components/ContributionFeed";
+import { AuctionStatusComponents } from "../components/AuctionStatusComponents";
+import AVATAR from "../assets/avatar.svg";
+import { ContributionCard } from "../components/ContributionCard";
+
 export const Team = () => {
   const [money_accrued, set_money_accrued] = useState(0.0);
   const [money_goal, set_money_goal] = useState(0.0);
-  const [money_entered, set_money_entered] = useState(" ");
   const [transactionsData, setTransactions] = useState({});
   const [contract, setContract] = useState({});
+  const [isNFTBought, setIsNFTBought] = useState(false);
+  const toast = useToast();
 
-  // format
-  /***
+  const [NFTMetadata, setNFTMetadata] = useState(null);
+  /*
+   * NFTMetadata
     {
     "token_id": "437:1",
     "owner_id": "ahuiheo.testnet",
@@ -42,22 +73,25 @@ export const Team = () => {
         "paras-marketplace-v2.testnet": 6
     }
    */
-  const [NFTMetadata, setNFTMetadata] = useState(null);
 
-  // when the user has not yet interacted with the form, disable the Button
-  const [ButtonDisabled, setButtonDisabled] = React.useState(true);
-
-  const roundToHundredth = (value) => {
-    return Number(value.toFixed(2));
-  };
-
-  function convert_yocto_to_near(float) {
-    return roundToHundredth(float / 10 ** 24);
+  const [teamMetadata, setTeamMetadata] = useState(null);
+  /**
+   * teamMetadata
+   * 
+  {
+    "team_name": "Test",
+    "token_metadata": {
+        "spec": "ft-1.0.0",
+        "name": "test",
+        "symbol": "test",
+        "icon": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 288'%3E%3Cg id='l' data-name='l'%3E%3Cpath d='M187.58,79.81l-30.1,44.69a3.2,3.2,0,0,0,4.75,4.2L191.86,103a1.2,1.2,0,0,1,2,.91v80.46a1.2,1.2,0,0,1-2.12.77L102.18,77.93A15.35,15.35,0,0,0,90.47,72.5H87.34A15.34,15.34,0,0,0,72,87.84V201.16A15.34,15.34,0,0,0,87.34,216.5h0a15.35,15.35,0,0,0,13.08-7.31l30.1-44.69a3.2,3.2,0,0,0-4.75-4.2L96.14,186a1.2,1.2,0,0,1-2-.91V104.61a1.2,1.2,0,0,1,2.12-.77l89.55,107.23a15.35,15.35,0,0,0,11.71,5.43h3.13A15.34,15.34,0,0,0,216,201.16V87.84A15.34,15.34,0,0,0,200.66,72.5h0A15.35,15.35,0,0,0,187.58,79.81Z'/%3E%3C/g%3E%3C/svg%3E",
+        "reference": null,
+        "reference_hash": null,
+        "decimals": 24
+    }
   }
+   */
 
-  function convert_near_to_yocto(near_val) {
-    return roundToHundredth(near_val * 10 ** 24);
-  }
   const history = useLocation();
 
   const [teamId, setTeamId] = useState("");
@@ -68,7 +102,10 @@ export const Team = () => {
   }
 
   const nftImage = useMemo(
-    () => `https://ipfs.fleek.co/ipfs/${NFTMetadata?.metadata?.media}`,
+    () =>
+      NFTMetadata?.metadata?.media
+        ? `https://ipfs.fleek.co/ipfs/${NFTMetadata?.metadata?.media}`
+        : null,
     [NFTMetadata]
   );
 
@@ -76,7 +113,6 @@ export const Team = () => {
     async () => {
       const id = getTeamId(window.location.pathname);
       setTeamId(id);
-
       const newContract = await new Contract(
         window.walletConnection.account(),
         id,
@@ -86,29 +122,37 @@ export const Team = () => {
             "get_money_goal",
             "get_record",
             "get_records",
-            "get_nft_Id",
+            "get_nft_id",
+            "get_team_metadata",
+            "get_nft_bought",
           ],
           changeMethods: ["pay_money", "refund_money"],
         }
       );
 
       setContract(newContract);
-      const token_id = await newContract.get_nft_Id();
-      console.log(token_id);
-      const response = await window.parasContract.nft_token({
+
+      // get NFTMetadata
+      const token_id = await newContract.get_nft_id();
+      const fetchedNFTMetadata = await window.parasContract.nft_token({
         token_id: token_id.includes(":") ? `${token_id}` : `${token_id}:1`,
       });
-      console.log(response);
-      setNFTMetadata(response);
+      setNFTMetadata(fetchedNFTMetadata);
 
+      // get teamMetadata
+      const fetchedTeamMetadata = await newContract.get_team_metadata();
+      setTeamMetadata(fetchedTeamMetadata);
+
+      const fetchedNFTBought = await newContract.get_nft_bought();
+      setIsNFTBought(fetchedNFTBought);
       // in this case, we only care to query the contract when signed in
       if (window.walletConnection.isSignedIn()) {
         // window.contract is set by initContract in index.js
         newContract.get_money_accrued().then((money_accrued) => {
-          set_money_accrued(convert_yocto_to_near(money_accrued));
+          set_money_accrued(safeFormatNearAmount(money_accrued));
         });
         newContract.get_money_goal().then((money_goal) => {
-          set_money_goal(convert_yocto_to_near(money_goal) + 1);
+          set_money_goal(safeFormatNearAmount(money_goal) + 1);
         });
         newContract.get_records().then((records) => {
           let transactions = {};
@@ -116,7 +160,6 @@ export const Team = () => {
             transactions[records[0][i]] = records[1][i];
           }
           setTransactions(transactions);
-          console.log(transactions);
         });
       }
     },
@@ -129,33 +172,46 @@ export const Team = () => {
 
   // if not signed in, return early with sign-in prompt
 
-  function send_money() {
+  function send_money(deposit) {
     // refund_money();
-    const deposit = BigInt(parseInt(money_entered) * 10 ** 24);
-    console.log(parseFloat(deposit, 10));
-    console.log(deposit.toString());
     contract
       .pay_money(
         {},
         "300000000000000", // attached GAS (optional)
-        deposit.toString() // attached deposit in yoctoNEAR (optional)
+        safeParseNearAmount(deposit) // attached deposit in yoctoNEAR (optional)
       )
       .catch((e) => {
         console.log(e);
       });
   }
 
-  function refund_money() {
-    const deposit = money_entered.concat("0000000000000000000");
-    contract
-      .refund_money(
-        { amount: deposit },
-        "300000000000000" // attached GAS (optional)
-      )
-      .catch((e) => {
-        console.log(e);
-      });
-  }
+  // function refund_money() {
+  //   // const deposit = money_entered.concat("0000000000000000000");
+  //   contract
+  //     .refund_money(
+  //       { amount: deposit },
+  //       "300000000000000" // attached GAS (optional)
+  //     )
+  //     .catch((e) => {
+  //       console.log(e);
+  //     });
+  // }
+
+  const copy = async () => {
+    await navigator.clipboard.writeText(window.location.href);
+    toast({
+      title: "BLOC Link Copied!",
+      description: "We've copied the link for you to share.",
+      status: "success",
+      duration: 2000,
+      isClosable: true,
+    });
+  };
+
+  const MemoizedAuctionComponents = AuctionStatusComponents(
+    isNFTBought ? "Bought" : "Active",
+    money_goal
+  );
 
   return (
     // use React Fragment, <>, to avoid wrapping elements in unnecessary divs
@@ -167,118 +223,227 @@ export const Team = () => {
         mt="75px"
       >
         <Box>
-          <Box display="flex" justifyContent="center">
+          <Box
+            display="flex"
+            justifyContent="center"
+            borderRadius="20px"
+            flexDir="column"
+            p="18px"
+            boxShadow="0px 0px 10px #D8D7E6"
+          >
             <Box
-              borderRadius="20px"
-              boxShadow="0px 0px 10px #D8D7E6"
               display="flex"
               alignItems="center"
               justifyContent="center"
-              width={["300px", "400px", "500px"]}
-              height={["300px", "400px", "500px"]}
+              width={["100%", null, "500px"]}
+              height={["300px", null, "500px"]}
             >
               <Image
-                objectFit="cover"
+                objectFit="contain"
                 borderRadius="20px"
-                src={nftImage ? nftImage : moon}
-                width={"93%"}
-                height={"93%"}
+                src={
+                  nftImage
+                    ? nftImage
+                    : "https://imageio.forbes.com/specials-images/imageserve/5c926ffaa7ea43206f12c13c/0x0.jpg?format=jpg&crop=1447,1446,x173,y154,safe&height=416&width=416&fit=bounds"
+                }
+                width={"100%"}
+                height={"100%"}
               />
             </Box>
-          </Box>
-          <Box
-            position="relative"
-            mt="10px"
-            sx={{ "& *": { borderRadius: "10px", height: "20px" } }}
-          >
             <Box
-              position="absolute"
-              width="100%"
-              bg="linear-gradient(269.99deg, #FFF7E9 0.01%, #ECEBFB 101.44%)"
-            />
-            <Box
-              bg="#524E8A"
-              position="absolute"
-              width={`${0.2 * 100}%`}
-              transition="width 1s ease-in-out"
-            />
-          </Box>
-          <Box ml="-5px" mt="30px" display="flex" alignItems="center">
-            <Image
-              transform={{ transition: "all 1s ease" }}
-              _hover={{
-                filter: "drop-shadow(0px 0px 10px rgba(82, 78, 138, 0.21))",
-              }}
-              src={NearLogo}
-            />
-            <Text color="#9998A8" fontSize="20px">
-              Raised {money_accrued} / {money_goal} NEAR
-            </Text>
-            {money_goal ? (
-              <Text ml="4px">({(money_accrued / money_goal) * 100}%)</Text>
-            ) : (
-              <></>
-            )}
-          </Box>
-        </Box>
-        <Box ml={["0px", null, null, "33px"]}>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            width={["unset", null, null, "100%"]}
-          >
-            <Box>
-              <Text fontSize="24px" fontWeight="600">
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Text mt="24px" fontSize="24px" fontWeight="600">
                 {NFTMetadata?.metadata.title ?? "Loading..."}
               </Text>
-              <Box fontSize="14px" color="rgba(97,95,119,1)">
-                <Text>Buy Price: {money_goal} Near</Text>
-                <Text>{Object.keys(transactionsData).length} members</Text>
-              </Box>
+              <Image
+                pt="10px"
+                mt="10px"
+                transform={{ transition: "all 1s ease" }}
+                _hover={{
+                  filter: "drop-shadow(0px 0px 10px rgba(82, 78, 138, 0.21))",
+                }}
+                src={NearLogo}
+              />
             </Box>
-            <Box>
-              <ShareIcon />
+            <Box display="flex" justifyContent="space-between">
+              <Text color="#221F4E" fontWeight="600">
+                Current Owner
+              </Text>
+              <Tooltip label={NFTMetadata?.owner_id} placement="top">
+                <Text color="#597BBD">
+                  {truncateAddress(NFTMetadata?.owner_id)}
+                </Text>
+              </Tooltip>
             </Box>
-          </Box>
-          <Box mt="24px" display="flex">
-            <Input
-              type="text"
-              value={money_entered}
-              onChange={(e) => {
-                set_money_entered(e.target.value);
-              }}
-            />
-            <Button
-              style={{
-                justifyContent: "center",
-                display: "flex",
-                alignContent: "center",
-              }}
-              onClick={send_money}
+            <Box display="flex" justifyContent="space-between">
+              <Text color="#221F4E" fontWeight="600">
+                Token ID
+              </Text>
+              <Text color="#597BBD">{NFTMetadata?.token_id}</Text>
+            </Box>
+            {MemoizedAuctionComponents.banner}
+            <Text
+              mt="5px"
+              fontSize={["12px", null, null, "15px"]}
+              color="rgba(139, 137, 168, 1)"
+              textAlign="center"
             >
-              Send Money
-            </Button>
+              This is the price that {teamMetadata?.team_name} is trying to buy
+              the NFT at.
+            </Text>
           </Box>
+        </Box>
+        <Box
+          mt={["24px", null, null, "unset"]}
+          width="100%"
+          ml={["0px", null, null, "33px"]}
+        >
+          <Box
+            borderRadius="20px"
+            display="flex"
+            flexDir="column"
+            width={["unset", null, null, "100%"]}
+            py="48px"
+            px={["32px", null, null, "72px"]}
+            boxShadow="0px 0px 10px #D8D7E6"
+          >
+            <Box width="100%" display="flex" justifyContent="space-between">
+              {teamMetadata && (
+                <>
+                  <Box>
+                    <Text fontSize="20px" fontWeight="700" color="#8B89A8">
+                      {`$${teamMetadata?.token_metadata?.symbol}`}
+                    </Text>
+                    <Text fontSize="24px" fontWeight="600">
+                      {teamMetadata?.team_name}
+                    </Text>
+                    <Box mt="8px">
+                      <MemoizedAuctionComponents.badge />
+                    </Box>
+                    <Box mt="8px">
+                      <Text color="rgba(89, 123, 189, 1)" fontSize="16px">
+                        {Object.keys(transactionsData).length} BLOC members
+                      </Text>
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Box
+                      borderRadius="100%"
+                      p="10px"
+                      _hover={{ bg: "rgba(0, 0, 0, 0.05)" }}
+                      transition="all 0.2s ease-in"
+                      onClick={copy}
+                    >
+                      <ShareIcon />
+                    </Box>
+                  </Box>
+                </>
+              )}
+              {!teamMetadata && (
+                <Box display="flex" flexDir="column" width="100%">
+                  <SkeletonCircle size="10" />
+                  <SkeletonText
+                    mt="10px"
+                    mb="25px"
+                    width="100%"
+                    height="20px"
+                  />
+                </Box>
+              )}
+            </Box>
+            {teamMetadata && (
+              <>
+                <Box borderTop="1px solid rgba(236, 235, 251, 1)" my="24px" />
+                <Box>
+                  <Text
+                    color="rgba(139, 137, 168, 1)"
+                    fontWeight="700"
+                    fontSize="20px"
+                  >
+                    BLOC HOST
+                  </Text>
+                  <Text
+                    fontSize="13px"
+                    mt="16px"
+                    color="rgba(105, 103, 142, 1)"
+                  >
+                    The BLOC Host below summoned the BLOC.
+                  </Text>
+
+                  <Badge
+                    mt="16px"
+                    py="2px"
+                    px="8px"
+                    display="flex"
+                    bg="rgba(249, 249, 254, 1)"
+                    color="rgba(82, 78, 138, 1)"
+                    width="fit-content"
+                    alignItems="center"
+                    borderRadius="10px"
+                  >
+                    <Image src={AVATAR} /> <Text ml="4px">user.near</Text>
+                  </Badge>
+                </Box>
+              </>
+            )}
+          </Box>
+          <ContributionCard
+            money_accrued={money_accrued}
+            money_goal={money_goal}
+            teamMetadata={teamMetadata}
+            send_money={send_money}
+          />
         </Box>
       </Box>
       <Box mt="42px">
         <Text fontSize="28px" fontWeight="700">
-          Contributors
+          Recent Activity
         </Text>
         <Box my="24px">
-          <ul style={{ marginTop: "5px", marginBottom: "5px" }}>
-            {Object.keys(transactionsData).map(function (key) {
-              return (
-                <li>
-                  {key}: {convert_yocto_to_near(transactionsData[key])} Near
-                </li>
-              );
-            })}
-          </ul>
-          <ContributionFeed feed={[]} />
+          {Object.keys(transactionsData).map(function (key) {
+            return (
+              <Box
+                borderRadius="15px"
+                boxShadow="0px 0px 10px #D8D7E6"
+                px="50px"
+                py="23px"
+                alignItems="center"
+                display="flex"
+                justifyContent="space-between"
+              >
+                <Box display="flex" alignItems="center">
+                  <Image width="50px" height="50px" src={AVATAR} />
+                  <Text
+                    ml="24px"
+                    color="rgba(89, 123, 189, 1)"
+                    fontWeight="600"
+                  >
+                    @{key}{" "}
+                    <Box as="span" color="black">
+                      contributed to
+                    </Box>{" "}
+                    {teamMetadata.team_name}
+                  </Text>
+                </Box>
+                <Box>
+                  <Text fontSize="32px">
+                    {Number(
+                      safeFormatNearAmount(transactionsData[key])
+                    ).toFixed(2)}{" "}
+                    NEAR
+                  </Text>
+                </Box>
+              </Box>
+            );
+          })}
         </Box>
       </Box>
       {/* <main>
+      : {safeFormatNearAmount(transactionsData[key])} Near
         <h1 style={{ justifyContent: "center", display: "flex" }}>
           {money_accrued < money_goal ? <>Almost there </> : <> NFT Bought!</>}
         </h1>
