@@ -1,7 +1,7 @@
 use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
 use near_sdk::serde::{Deserialize, Serialize};
 use near_sdk::serde_json;
-use near_sdk::{env, near_bindgen, setup_alloc, Promise, Gas};
+use near_sdk::{env, near_bindgen, setup_alloc, Promise, Gas, AccountId};
 
 setup_alloc!();
 
@@ -15,6 +15,7 @@ pub struct DeployArgs {
     name: String, 
     symbol: String,
     nft_account_id: String,
+    host: AccountId
 }
 
 #[near_bindgen]
@@ -39,7 +40,7 @@ impl Factory {
     pub fn deploy(self, money_goal: String, nft_id: String, current_time: String , team_name:String, token_name:String, token_symbol:String) -> String {
         let mut account_id: String = "dev-party-12345678912345678".to_string();
         account_id.push_str(&current_time);
-        let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id, team_name: team_name.to_string(), name: token_name.to_string(), symbol: token_symbol.to_string(), nft_account_id: "paras-token-v2.testnet".to_string()};
+        let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id, team_name: team_name.to_string(), name: token_name.to_string(), symbol: token_symbol.to_string(), nft_account_id: "paras-token-v2.testnet".to_string(), host: env::signer_account_id()};
 
         let gas: Gas = 75000000000000.into();
 

@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
-import { Home, Team, Teams, Governance } from "./views";
+import { Home, Team, Teams } from "./views";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./common/theme";
 export default function App() {
@@ -16,7 +16,6 @@ export default function App() {
             key={window.location.pathname}
           />
           <Route path="/teams" element={<Teams />} />
-          <Route path="/gov" element={<Governance />} />
         </Routes>
       </ChakraProvider>
     </>
