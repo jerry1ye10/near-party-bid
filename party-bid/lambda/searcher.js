@@ -4,6 +4,20 @@ var documentClient = new AWS.DynamoDB.DocumentClient();
 
 // This searches dynamodb for contracts matching the search term, or contracts belonging to a team
 exports.handler = async (event) => {
+    // Reject the request if theres no body
+    if (!event.body) {
+        return {
+            statusCode: 400,
+            headers: {
+                "Access-Control-Allow-Headers" : "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST"
+            },
+            body: JSON.stringify({
+                message: 'Missing body'
+            })
+        };
+    }
     let json = JSON.parse(event.body)
 
     // If json.team is set, then we are searching for contracts belonging to a team using a dynamodb query
@@ -47,9 +61,27 @@ exports.handler = async (event) => {
             response = await documentClient.scan(params).promise();
         }
     }
+    else {
+        return {
+            statusCode: 500,
+            headers: {
+                "Access-Control-Allow-Headers" : "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST"
+            },
+            body: JSON.stringify({
+                "message": "An internal error occurred."
+            })
+        };
+    }
 
     let thing = {
         statusCode: 200,
+        headers: {
+            "Access-Control-Allow-Headers" : "Content-Type",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "POST"
+        },
         body: JSON.stringify(response.Items)
     };
     return thing;

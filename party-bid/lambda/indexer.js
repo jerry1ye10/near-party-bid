@@ -34,8 +34,12 @@ exports.handler = async (event) => {
     if (!event.body) {
         return {
             statusCode: 400,
+            headers: {
+                "Access-Control-Allow-Headers" : "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST"
+            },
             body: JSON.stringify({
-                error: 'Bad Request',
                 message: 'No body found in request'
             })
         }
@@ -47,6 +51,11 @@ exports.handler = async (event) => {
     if (!json.contract_id || !json.team_id) {
         return {
             statusCode: 400,
+            headers: {
+                "Access-Control-Allow-Headers" : "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST"
+            },
             body: JSON.stringify({
                 message: 'Missing contract_id or team_id'
             })
@@ -71,6 +80,11 @@ exports.handler = async (event) => {
         if (resp.error) {
             return {
                 statusCode: 400,
+                headers: {
+                    "Access-Control-Allow-Headers" : "Content-Type",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST"
+                },
                 body: JSON.stringify({
                     message: 'Invalid contract'
                 })
@@ -82,6 +96,11 @@ exports.handler = async (event) => {
         if (resp.result.hash !== process.env.partyhash) {
             return {
                 statusCode: 400,
+                headers: {
+                    "Access-Control-Allow-Headers" : "Content-Type",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST"
+                },
                 body: JSON.stringify({
                     message: 'Invalid contract'
                 })
@@ -104,6 +123,11 @@ exports.handler = async (event) => {
         let res = await ddb.putItem(params).promise();
         return {
             statusCode: 200,
+            headers: {
+                "Access-Control-Allow-Headers" : "Content-Type",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST"
+            },
             body: JSON.stringify({
                 message: 'Contract Indexed'
             })
@@ -113,6 +137,11 @@ exports.handler = async (event) => {
         if (err.code === 'ConditionalCheckFailedException') {
             return {
                 statusCode: 400,
+                headers: {
+                    "Access-Control-Allow-Headers" : "Content-Type",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST"
+                },
                 body: JSON.stringify({
                     message: 'Duplicate contract'
                 })
@@ -120,6 +149,11 @@ exports.handler = async (event) => {
         } else {
             return {
                 statusCode: 500,
+                headers: {
+                    "Access-Control-Allow-Headers" : "Content-Type",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST"
+                },
                 body: JSON.stringify({
                     message: 'Internal Server Error'
                 })

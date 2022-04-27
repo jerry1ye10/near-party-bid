@@ -10,7 +10,7 @@ by the client when a contract is created. It matches the contract code hash and 
 the contract is running our code. If this check passes, it's added along with the owning team address
 to our DynamoDB table.
 
-POST https://vgge4rzeqq7f5r2it5rigga3240opjqp.lambda-url.us-east-1.on.aws/
+POST https://6b1gigieq6.execute-api.us-east-1.amazonaws.com/prod/index
 <br>Content-Type: application/json
 <br>Body: ```
 {
@@ -28,7 +28,7 @@ the check_method environment variable.
 The searcher function is responsible for searching for contracts in our DynamoDB table.
 Contracts can be searched by exact team address, or partial or full contract address.
 
-POST https://ac6u4jq7nqkdhc5etgtz6pouhy0ognna.lambda-url.us-east-1.on.aws/
+POST https://6b1gigieq6.execute-api.us-east-1.amazonaws.com/prod/search
 <br>Content-Type: application/json
 <br>Body can be either: ```
 {
