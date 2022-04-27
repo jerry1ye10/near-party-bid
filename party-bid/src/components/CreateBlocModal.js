@@ -13,7 +13,11 @@ import {
 } from "@chakra-ui/react";
 
 export const CreateTeamModal = ({ isOpen, onClose }) => {
+  // TODO: Add Validation
   const [url, set_url] = useState("");
+  const [teamName, setTeamName] = useState("");
+  const [tokenName, setTokenName] = useState("");
+  const [symbol, setSymbol] = useState("");
 
   async function createParty() {
     //TODO: Change this algo when we convert from testnet -> mainnet
@@ -34,6 +38,9 @@ export const CreateTeamModal = ({ isOpen, onClose }) => {
           ).toString(),
           nft_id: nftId,
           current_time: new Date().valueOf().toString(),
+          team_name: teamName,
+          token_name: tokenName,
+          token_symbol: symbol,
         },
         "300000000000000" // attached GAS (optional)
       );
@@ -54,12 +61,48 @@ export const CreateTeamModal = ({ isOpen, onClose }) => {
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text fontWeight="600" fontSize="15px">
-            Enter URL Below:
+          <Text mt="10px" fontWeight="600" fontSize="15px">
+            What is your Team Name?
+          </Text>
+          <Input
+            placeholder="BLOC Crew"
+            mt="5px"
+            type="text"
+            value={teamName}
+            onChange={(e) => {
+              setTeamName(e.target.value);
+            }}
+          />
+          <Text mt="10px" fontWeight="600" fontSize="15px">
+            If you win this bid, what is your token name?
+          </Text>
+          <Input
+            placeholder="BLOC"
+            mt="5px"
+            type="text"
+            value={tokenName}
+            onChange={(e) => {
+              setTokenName(e.target.value);
+            }}
+          />
+          <Text mt="10px" fontWeight="600" fontSize="15px">
+            If you win this bid, what is your token symbol?
+          </Text>
+          <Input
+            placeholder="BLC"
+            mt="5px"
+            type="text"
+            value={symbol}
+            onChange={(e) => {
+              setSymbol(e.target.value);
+            }}
+          />
+          <Text mt="10px" fontWeight="600" fontSize="15px">
+            Enter URL of NFT to Bid:
           </Text>
           <Input
             placeholder="https://testnet.paras.id/token/paras-token-v2.testnet::298"
-            mt="10px"
+            mt="5px"
             type="text"
             value={url}
             onChange={(e) => {

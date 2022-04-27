@@ -28,7 +28,8 @@ setup_alloc!();
 //ADD PANICONDEFAULT BELOW TODO
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
-pub struct Welcome {
+pub struct PartyContract {
+    team_name: String,
     records: UnorderedMap<String, u128>,
     money_goal: u128,
     money_accrued: u128,
@@ -41,6 +42,8 @@ pub struct Welcome {
     listing_available: bool,
     nft_sold: bool,
 }
+
+
 const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 288 288'%3E%3Cg id='l' data-name='l'%3E%3Cpath d='M187.58,79.81l-30.1,44.69a3.2,3.2,0,0,0,4.75,4.2L191.86,103a1.2,1.2,0,0,1,2,.91v80.46a1.2,1.2,0,0,1-2.12.77L102.18,77.93A15.35,15.35,0,0,0,90.47,72.5H87.34A15.34,15.34,0,0,0,72,87.84V201.16A15.34,15.34,0,0,0,87.34,216.5h0a15.35,15.35,0,0,0,13.08-7.31l30.1-44.69a3.2,3.2,0,0,0-4.75-4.2L96.14,186a1.2,1.2,0,0,1-2-.91V104.61a1.2,1.2,0,0,1,2.12-.77l89.55,107.23a15.35,15.35,0,0,0,11.71,5.43h3.13A15.34,15.34,0,0,0,216,201.16V87.84A15.34,15.34,0,0,0,200.66,72.5h0A15.35,15.35,0,0,0,187.58,79.81Z'/%3E%3C/g%3E%3C/svg%3E";
 //Hashmap of accountname: money contributed
 //Buy the nft when theres enough money
@@ -50,9 +53,9 @@ const DATA_IMAGE_SVG_NEAR_ICON: &str = "data:image/svg+xml,%3Csvg xmlns='http://
 
 const TRANSACTION_FEE: f64 = 0.01;
 
-impl Default for Welcome {
+impl Default for PartyContract {
   fn default() -> Self {
-    Welcome::new("2000000000000000000000000".to_string(), "704".to_string(), "jerry".to_string(), "jerry".to_string(), "paras-token-v2.testnet".to_string())
+    PartyContract::new("2000000000000000000000000".to_string(), "704".to_string(), "jerry_team".to_string(), "jerry".to_string(), "jerry".to_string(), "paras-token-v2.testnet".to_string())
   }
 }
 
@@ -64,7 +67,7 @@ pub trait ExtSelf {
 }
 
 #[near_bindgen]
-impl FungibleTokenCore for Welcome{
+impl FungibleTokenCore for PartyContract{
 
     fn ft_balance_of(&self, account_id: AccountId) -> U128 { 
         return self.token.accounts.get(&account_id).unwrap().into();
@@ -95,18 +98,18 @@ impl FungibleTokenCore for Welcome{
 
 }
 
-//near_contract_standards::impl_fungible_token_core!(Welcome, token, on_tokens_burned);
-near_contract_standards::impl_fungible_token_storage!(Welcome, token, on_account_closed);
+//near_contract_standards::impl_fungible_token_core!(PartyContract, token, on_tokens_burned);
+near_contract_standards::impl_fungible_token_storage!(PartyContract, token, on_account_closed);
 
 #[near_bindgen]
-impl FungibleTokenMetadataProvider for Welcome {
+impl FungibleTokenMetadataProvider for PartyContract {
     fn ft_metadata(&self) -> FungibleTokenMetadata {
         self.metadata.get().unwrap()
     }
 }
 
 #[near_bindgen]
-impl Welcome{
+impl PartyContract{
 
 
     fn on_account_closed(&mut self, account_id: AccountId, balance: Balance) {
@@ -137,9 +140,9 @@ impl Welcome{
 }
 
 #[near_bindgen]
-impl Welcome {
+impl PartyContract {
     #[init]
-    pub fn new(money_goal: String, nft_id: String, name: String, symbol: String, nft_account_id: String) -> Self {
+    pub fn new(money_goal: String, nft_id: String, team_name:String, name: String, symbol: String, nft_account_id: String) -> Self {
         assert!(!env::state_exists(), "Already, initialized");
         let owner_id = env::current_account_id();
         let metadata = FungibleTokenMetadata {
@@ -152,6 +155,7 @@ impl Welcome {
             decimals: 24,
         };
         let mut this = Self {
+            team_name: team_name,
             token: FungibleToken::new(b"a".to_vec()),
             metadata: LazyOption::new(b"m".to_vec(), Some(&metadata)),
             records: UnorderedMap::new(b"a".to_vec()),
@@ -178,7 +182,7 @@ impl Welcome {
       
     }
 
-impl Welcome {
+impl PartyContract {
     //static functions
     fn convert_near_to_yecto(near_amount: i128) -> i128 {
         return (near_amount * 1000000000000000000000000) as i128;
@@ -207,8 +211,18 @@ trait ContractParas {
     );
 }
 
+
+
+#[derive(Serialize, Deserialize, BorshDeserialize, BorshSerialize)]
+#[serde(crate = "near_sdk::serde")]
+pub struct TeamMetadata {
+    team_name: String,
+    token_metadata: FungibleTokenMetadata,
+}
+
+
 #[near_bindgen]
-impl Welcome {
+impl PartyContract {
     pub fn get_money_accrued(self) -> u128 {
         return self.money_accrued;
     }
@@ -216,8 +230,21 @@ impl Welcome {
     pub fn get_money_goal(self) -> u128 {
         return self.money_goal;
     }
-    pub fn get_nft_Id(self) -> String {
+    pub fn get_nft_id(self) -> String {
         return self.nft_id;
+    }
+    pub fn get_team_metadata(self) -> TeamMetadata {
+        return TeamMetadata {
+            team_name: self.team_name,
+            token_metadata: self.metadata.get().unwrap(),
+        }
+    }
+    pub fn get_team_name(self) -> String {
+        return self.team_name
+    }
+
+    pub fn get_token_data(self) -> FungibleTokenMetadata {
+        return self.metadata.get().unwrap()
     }
 
     pub fn get_records(self) -> (Vec<String>, Vec<u128>) {
@@ -452,7 +479,7 @@ impl Welcome {
         assert!(!self.nft_bought, "NFT has been bought already");
         let refund_amount = amount.parse::<u128>().unwrap();
         let caller_id = env::signer_account_id();
-        let record_amount = Welcome::get_record(self, &caller_id.to_string());
+        let record_amount = PartyContract::get_record(self, &caller_id.to_string());
         assert!(record_amount >= refund_amount);
         self.records.insert(
             &caller_id.to_string(),
@@ -537,7 +564,7 @@ impl Welcome {
         }
         self.records.insert(
             &account_id.to_string(),
-            &(deposit-final_deposit + Welcome::get_record(self, &account_id.to_string())),
+            &(deposit-final_deposit + PartyContract::get_record(self, &account_id.to_string())),
         );
         log!("test {} {} {} {} {}", deposit, final_deposit, self.money_accrued, self.money_goal, deposit-final_deposit );
        

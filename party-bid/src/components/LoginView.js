@@ -4,7 +4,6 @@ import { Button, Text, Box } from "@chakra-ui/react";
 import { BiWallet } from "react-icons/bi";
 
 export default function LoginView() {
-  console.log(window.walletConnection.isSignedIn());
   if (!window.walletConnection.isSignedIn()) {
     return (
       <Button variant="primary" style={{ float: "right" }} onClick={login}>

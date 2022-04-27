@@ -11,6 +11,7 @@ setup_alloc!();
 pub struct DeployArgs {
     money_goal: String,
     nft_id: String,
+    team_name: String,
     name: String, 
     symbol: String,
     nft_account_id: String,
@@ -35,10 +36,10 @@ const CODE: &[u8] = include_bytes!("./party.wasm");
 #[near_bindgen]
 impl Factory {
 
-    pub fn deploy(self, money_goal: String, nft_id: String, current_time: String ) -> String {
+    pub fn deploy(self, money_goal: String, nft_id: String, current_time: String , team_name:String, token_name:String, token_symbol:String) -> String {
         let mut account_id: String = "dev-party-12345678912345678".to_string();
         account_id.push_str(&current_time);
-        let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id, name: "jerry".to_string(), symbol: "jerry".to_string(), nft_account_id: "paras-token-v2.testnet".to_string()};
+        let init_args = &DeployArgs { money_goal: money_goal, nft_id: nft_id, team_name: team_name.to_string(), name: token_name.to_string(), symbol: token_symbol.to_string(), nft_account_id: "paras-token-v2.testnet".to_string()};
 
         let gas: Gas = 75000000000000.into();
 
