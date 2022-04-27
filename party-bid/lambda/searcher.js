@@ -8,6 +8,7 @@ exports.handler = async (event) => {
 
     // If json.team is set, then we are searching for contracts belonging to a team using a dynamodb query
     // Otherwise, we are searching for contracts matching the search term using a dynamodb scan to check contracts containing the criteria
+    let response;
     if (json.team) {
         var params = {
             TableName: "Parties",
@@ -17,7 +18,8 @@ exports.handler = async (event) => {
                 ":team": json.team
             }
         };
-    } else {
+        response = await documentClient.query(params).promise();
+    } else if (json.search) {
         var params = {
             TableName: "Parties",
             FilterExpression: "contains(#search, :search)",
@@ -28,9 +30,24 @@ exports.handler = async (event) => {
                 ":search": json.search
             }
         };
+        response = await documentClient.scan(params).promise();
+    } else if (json.count) {
+        // If the value of json.count is *, then return all the contracts
+        if (json.count == "*") {
+            var params = {
+                TableName: "Parties"
+            };
+            response = await documentClient.scan(params).promise();
+        } else {
+            // Otherwise, return the first n contracts
+            var params = {
+                TableName: "Parties",
+                Limit: json.count
+            };
+            response = await documentClient.scan(params).promise();
+        }
     }
 
-    let response = await (json.team ? documentClient.query(params).promise() : documentClient.scan(params).promise())
     let thing = {
         statusCode: 200,
         body: JSON.stringify(response.Items)

@@ -24,6 +24,9 @@ const post = (payload) => new Promise((resolve, reject) => {
     req.end();
 })
 
+// If env.DEBUG_MODE is set, set debug mode to true
+const DEBUG_MODE = process.env.DEBUG_MODE === 'true';
+
 // This function is responsible for taking http post requests, validating the contract submitted matches
 // the correct hash for a valid party contract, and indexing them in a dynamodb table if they are valid.
 exports.handler = async (event) => {
@@ -64,7 +67,7 @@ exports.handler = async (event) => {
 
     let resp = await post(body);
     // If the resp contains a key 'error' then the contract is invalid
-    if (resp.error) {
+    if (!DEBUG_MODE && resp.error) {
         return {
             statusCode: 400,
             body: JSON.stringify({
@@ -75,7 +78,7 @@ exports.handler = async (event) => {
 
     // Now we know that the contract exists, check it's code hash located in resp.result.hash
     // If it matches the hash of the party contract, then we can index it in dynamodb
-    if (resp.result.hash !== process.env.partyhash) {
+    if (!DEBUG_MODE && resp.result.hash !== process.env.partyhash) {
         return {
             statusCode: 400,
             body: JSON.stringify({
