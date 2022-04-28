@@ -39,14 +39,16 @@ import {
 import { ContributionFeed } from "../components/ContributionFeed";
 import { AuctionStatusComponents } from "../components/AuctionStatusComponents";
 import AVATAR from "../assets/avatar.svg";
-import { ContributionCard } from "../components/ContributionCard";
+import { ContributionCard } from "../components/ContributionCard/index";
 
 export const Team = () => {
   const [money_accrued, set_money_accrued] = useState(0.0);
   const [money_goal, set_money_goal] = useState(0.0);
   const [transactionsData, setTransactions] = useState({});
-  const [contract, setContract] = useState({});
-  const [isNFTBought, setIsNFTBought] = useState(false);
+  const [contract, setContract] = useState(null);
+  const [contractState, setContractState] = useState("Loading");
+  const [sellPrice, setSellPrice] = useState(0);
+
   const toast = useToast();
 
   const [NFTMetadata, setNFTMetadata] = useState(null);
@@ -109,26 +111,51 @@ export const Team = () => {
     [NFTMetadata]
   );
 
+  const getContractState = async (contract) => {
+    const isNFTSold = await contract.get_nft_sold();
+    const isNFTBought = await contract.get_nft_bought();
+    const isListingAvailable = await contract.get_listing_available();
+
+    if (isListingAvailable && !isNFTSold) {
+      return "OnSale";
+    } else if (isNFTSold) {
+      return "Sold";
+    } else if (isNFTBought) {
+      return "Bought";
+    } else if (!isNFTBought) {
+      return "Active";
+    } else {
+      return "Failed";
+    }
+  };
+
   React.useEffect(
     async () => {
       const id = getTeamId(window.location.pathname);
       setTeamId(id);
-      const newContract = await new Contract(
-        window.walletConnection.account(),
-        id,
-        {
-          viewMethods: [
-            "get_money_accrued",
-            "get_money_goal",
-            "get_record",
-            "get_records",
-            "get_nft_id",
-            "get_team_metadata",
-            "get_nft_bought",
-          ],
-          changeMethods: ["pay_money", "refund_money"],
-        }
-      );
+      const newContract = new Contract(window.walletConnection.account(), id, {
+        viewMethods: [
+          "get_money_accrued",
+          "get_money_goal",
+          "get_record",
+          "get_records",
+          "get_nft_id",
+          "get_team_metadata",
+          "get_nft_bought",
+          "get_vote_price",
+          "get_sell_price",
+          "get_percent_voted",
+          "get_token_count",
+          "get_listing_available",
+          "get_nft_sold",
+        ],
+        changeMethods: [
+          "pay_money",
+          "buy_nft",
+          "refund_money",
+          "set_vote_price",
+        ],
+      });
 
       setContract(newContract);
 
@@ -139,12 +166,15 @@ export const Team = () => {
       });
       setNFTMetadata(fetchedNFTMetadata);
 
+      const contractState = await getContractState(newContract);
+      setContractState(contractState);
+
       // get teamMetadata
       const fetchedTeamMetadata = await newContract.get_team_metadata();
       setTeamMetadata(fetchedTeamMetadata);
 
+      setSellPrice(safeFormatNearAmount(await newContract?.get_sell_price()));
       const fetchedNFTBought = await newContract.get_nft_bought();
-      setIsNFTBought(fetchedNFTBought);
       // in this case, we only care to query the contract when signed in
       if (window.walletConnection.isSignedIn()) {
         // window.contract is set by initContract in index.js
@@ -209,8 +239,8 @@ export const Team = () => {
   };
 
   const MemoizedAuctionComponents = AuctionStatusComponents(
-    isNFTBought ? "Bought" : "Active",
-    money_goal
+    contractState,
+    contractState === "Active" ? money_goal : sellPrice
   );
 
   return (
@@ -285,15 +315,6 @@ export const Team = () => {
               <Text color="#597BBD">{NFTMetadata?.token_id}</Text>
             </Box>
             {MemoizedAuctionComponents.banner}
-            <Text
-              mt="5px"
-              fontSize={["12px", null, null, "15px"]}
-              color="rgba(139, 137, 168, 1)"
-              textAlign="center"
-            >
-              This is the price that {teamMetadata?.team_name} is trying to buy
-              the NFT at.
-            </Text>
           </Box>
         </Box>
         <Box
@@ -307,7 +328,7 @@ export const Team = () => {
             flexDir="column"
             width={["unset", null, null, "100%"]}
             py="48px"
-            px={["32px", null, null, "72px"]}
+            px={["32px", null, null, "48px"]}
             boxShadow="0px 0px 10px #D8D7E6"
           >
             <Box width="100%" display="flex" justifyContent="space-between">
@@ -357,7 +378,9 @@ export const Team = () => {
             </Box>
             {teamMetadata && (
               <>
+                {/* Divider */}
                 <Box borderTop="1px solid rgba(236, 235, 251, 1)" my="24px" />
+                {/* Divider */}
                 <Box>
                   <Text
                     color="rgba(139, 137, 168, 1)"
@@ -385,13 +408,16 @@ export const Team = () => {
                     alignItems="center"
                     borderRadius="10px"
                   >
-                    <Image src={AVATAR} /> <Text ml="4px">user.near</Text>
+                    <Image src={AVATAR} />{" "}
+                    <Text ml="4px">{teamMetadata.host}</Text>
                   </Badge>
                 </Box>
               </>
             )}
           </Box>
           <ContributionCard
+            contract={contract}
+            contractState={contractState}
             money_accrued={money_accrued}
             money_goal={money_goal}
             teamMetadata={teamMetadata}
@@ -399,7 +425,7 @@ export const Team = () => {
           />
         </Box>
       </Box>
-      <Box mt="42px">
+      <Box mt="42px" width="100%">
         <Text fontSize="28px" fontWeight="700">
           Recent Activity
         </Text>
@@ -407,6 +433,7 @@ export const Team = () => {
           {Object.keys(transactionsData).map(function (key) {
             return (
               <Box
+                key={key}
                 borderRadius="15px"
                 boxShadow="0px 0px 10px #D8D7E6"
                 px="50px"

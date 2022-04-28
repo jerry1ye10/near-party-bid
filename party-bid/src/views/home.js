@@ -10,6 +10,7 @@ import NearLogo from "../assets/near_logo.svg";
 import { CreateTeamModal } from "../components/CreateBlocModal";
 import { Coin1, Coin2 } from "../components/svgs";
 import { useSpring, a, to } from "react-spring";
+import { Loader } from "../components/Loader";
 export const Home = () => {
   const {
     isOpen: isCreateBlockModalOpen,
@@ -117,7 +118,7 @@ export const Home = () => {
             See all BLOCs
           </Button>
         </Box>
-        <Box mt="72px" display="flex" position="relative">
+        <Box mt="48px" display="flex" position="relative">
           <Box maxW={["100%", null, null, "700px"]} width="100%">
             <Box>
               <Text fontSize="36px" fontWeight="bold">

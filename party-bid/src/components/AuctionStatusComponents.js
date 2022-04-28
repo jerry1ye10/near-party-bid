@@ -33,11 +33,36 @@ export const AuctionStatusComponents = (status, price) => {
         };
       case "Bought":
         return {
-          bg: "#F7EFEF",
-          color: "#8A4E4E",
+          bg: "#EFF0F7",
+          color: "#524E8A",
           tooltipCopy: "This BLOC has successfully bought the NFT.",
-          bannerCopy: "Reserved Price",
-          badgeCopy: "BLOC won 😁",
+          bannerCopy: "Bought For",
+          badgeCopy: "Reserved BLOC 😁",
+        };
+      case "OnSale":
+        return {
+          bg: "#F2F7EF",
+          color: "#708A4E",
+          tooltipCopy:
+            "This BLOC has reached voting consensus and NFT is on sale.",
+          bannerCopy: "Selling for",
+          badgeCopy: "On Sale 💰",
+        };
+      case "Sold":
+        return {
+          bg: "#EEEEEE",
+          color: "#8A8A8A",
+          tooltipCopy: "This BLOC NFT has been sold",
+          bannerCopy: "Sold at",
+          badgeCopy: "Sold",
+        };
+      default:
+        return {
+          bg: "#EEEEEE",
+          color: "#8A8A8A",
+          tooltipCopy: "Loading...",
+          bannerCopy: "Loading...",
+          badgeCopy: "Loading...",
         };
     }
   };

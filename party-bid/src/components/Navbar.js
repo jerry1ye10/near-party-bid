@@ -5,10 +5,7 @@ import { TITLE } from "../common/constants";
 import LoginView from "./LoginView";
 import { CreateTeamModal } from "./CreateBlocModal";
 export const Navbar = () => {
-  const pages = [
-    { name: "All Teams", url: "/teams" },
-    { name: "Governance", url: "/gov" },
-  ];
+  const pages = [{ name: "All Teams", url: "/teams" }];
   const {
     isOpen: isCreateBlockModalOpen,
     onOpen: onCreateBlocOpen,
@@ -45,7 +42,7 @@ export const Navbar = () => {
           variant="link"
           onClick={onCreateBlocOpen}
         >
-          +Create a Team
+          +Create a BLOC
         </Button>
         {pages.map((page, idx) => (
           <Link key={idx} to={page.url}>
