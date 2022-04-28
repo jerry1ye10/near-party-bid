@@ -54,7 +54,7 @@ impl Factory {
                 0,
                 gas,
             ).then(
-              return "Success".to_string()
+              return account_id.to_string()
             );
     }
 }

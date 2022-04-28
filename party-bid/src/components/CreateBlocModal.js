@@ -32,6 +32,7 @@ export const CreateTeamModal = ({ isOpen, onClose }) => {
 
     try {
       const resp = await window.contract.deploy(
+        //TODO: start loading icon
         {
           money_goal: BigInt(
             parseFloat(response) + 7780000000000000000000
@@ -44,7 +45,18 @@ export const CreateTeamModal = ({ isOpen, onClose }) => {
         },
         "300000000000000" // attached GAS (optional)
       );
-      console.log(resp);
+      const data = { contract_id: resp, team_id: resp };
+      fetch("https://us-central1-bloc-party-a25f6.cloudfunctions.net/indexer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      }).then((res) => {
+        if (res.status === 200) {
+          window.location = "/team/" + resp;
+          //TODO: Party has been created stop loading
+          //Change url
+        }
+      });
     } catch (e) {
       console.log(e);
       alert("oh no!");
