@@ -41,7 +41,7 @@ import { AuctionStatusComponents } from "../components/AuctionStatusComponents";
 import AVATAR from "../assets/avatar.svg";
 import { ContributionCard } from "../components/ContributionCard/index";
 
-export const Team = () => {
+export const Bloc = () => {
   const [money_accrued, set_money_accrued] = useState(0.0);
   const [money_goal, set_money_goal] = useState(0.0);
   const [transactionsData, setTransactions] = useState({});
@@ -274,7 +274,7 @@ export const Team = () => {
                 src={
                   nftImage
                     ? nftImage
-                    : "https://imageio.forbes.com/specials-images/imageserve/5c926ffaa7ea43206f12c13c/0x0.jpg?format=jpg&crop=1447,1446,x173,y154,safe&height=416&width=416&fit=bounds"
+                    : "https://cryptologos.cc/logos/near-protocol-near-logo.png?v=022"
                 }
                 width={"100%"}
                 height={"100%"}

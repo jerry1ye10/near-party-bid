@@ -5,7 +5,10 @@ import { TITLE } from "../common/constants";
 import LoginView from "./LoginView";
 import { CreateTeamModal } from "./CreateBlocModal";
 export const Navbar = () => {
-  const pages = [{ name: "All Teams", url: "/teams" }];
+  const pages = [
+    { name: "All Blocs", url: "/blocs" },
+    { name: "Marketplace", url: "/marketplace" },
+  ];
   const {
     isOpen: isCreateBlockModalOpen,
     onOpen: onCreateBlocOpen,

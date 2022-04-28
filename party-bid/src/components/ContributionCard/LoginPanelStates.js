@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { login } from "../../utils";
 import {
   Button,
@@ -18,7 +18,12 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 import NearLogo from "../../assets/near_logo.svg";
-export const LoginPanelStates = ({ teamMetadata, send_money, money_goal }) => {
+export const LoginPanelStates = ({
+  money_accrued,
+  teamMetadata,
+  send_money,
+  money_goal,
+}) => {
   const {
     isOpen: isContributionModalOpen,
     onOpen: onContributionModalOpen,
@@ -63,6 +68,7 @@ export const LoginPanelStates = ({ teamMetadata, send_money, money_goal }) => {
           yours!
         </Text>
         <ContributionModal
+          money_accrued={money_accrued}
           isOpen={isContributionModalOpen}
           onClose={onContributionModalClose}
           money_goal={money_goal}
@@ -73,8 +79,15 @@ export const LoginPanelStates = ({ teamMetadata, send_money, money_goal }) => {
   }
 };
 
-const ContributionModal = ({ isOpen, onClose, money_goal, send_money }) => {
-  const moneyInput = useRef(null);
+const ContributionModal = ({
+  isOpen,
+  onClose,
+  money_goal,
+  send_money,
+  money_accrued,
+}) => {
+  // const moneyInput = useRef(null);
+  const [moneyInput, setMoneyInput] = useState("");
   return (
     <Modal borderRadius="20px" size={"md"} isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -84,23 +97,40 @@ const ContributionModal = ({ isOpen, onClose, money_goal, send_money }) => {
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Text fontWeight="400" fontSize="20px">
-            Buy Price
-          </Text>
-          <Text fontWeight="700" fontSize="28px">
-            {money_goal} NEAR
-          </Text>
-          <InputGroup>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text fontWeight="700" color="#8B89A8" fontSize="20px">
+              Buy Price
+            </Text>
+            <Text fontWeight="700" fontSize="20px">
+              {Number(money_goal).toFixed(5)} NEAR
+            </Text>
+          </Box>
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Text fontWeight="700" color="#8B89A8" fontSize="20px">
+              Raised
+            </Text>
+            <Text fontWeight="700" fontSize="20px">
+              {Number(money_accrued).toFixed(5)} NEAR
+            </Text>
+          </Box>
+          <InputGroup mt="56px">
             <Input
-              ref={moneyInput}
+              value={moneyInput}
+              onChange={(e) => setMoneyInput(e.target.value)}
               borderRadius="15px"
-              mt="56px"
               bg="rgba(249, 249, 254, 1)"
             />
             <InputRightElement
               children={
                 <Image
-                  mt="-5px"
                   transform={{ transition: "all 1s ease" }}
                   _hover={{
                     filter: "drop-shadow(0px 0px 10px rgba(82, 78, 138, 0.21))",
@@ -112,7 +142,7 @@ const ContributionModal = ({ isOpen, onClose, money_goal, send_money }) => {
           </InputGroup>
         </ModalBody>
 
-        <ModalFooter>
+        <ModalFooter gap="10px">
           <Button
             variant="primary"
             width="100%"
@@ -120,6 +150,14 @@ const ContributionModal = ({ isOpen, onClose, money_goal, send_money }) => {
             onClick={() => send_money(moneyInput.current.value)}
           >
             Contribute
+          </Button>
+          <Button
+            variant="outline"
+            width="100%"
+            colorScheme="blue"
+            onClick={() => setMoneyInput(money_goal - money_accrued)}
+          >
+            Contribute ALL
           </Button>
         </ModalFooter>
       </ModalContent>

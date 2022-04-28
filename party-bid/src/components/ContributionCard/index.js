@@ -153,6 +153,7 @@ export const ContributionCard = ({
                     />
                   </Box>
                   <LoginPanelStates
+                    money_accrued={money_accrued}
                     teamMetadata={teamMetadata}
                     send_money={send_money}
                     money_goal={money_goal}

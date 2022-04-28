@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
-import { Home, Team, Teams } from "./views";
+import { Home, Bloc, Blocs, Marketplace } from "./views";
 import { ChakraProvider } from "@chakra-ui/react";
 import theme from "./common/theme";
 export default function App() {
@@ -9,13 +9,14 @@ export default function App() {
       <ChakraProvider theme={theme}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/team" element={<Team />} />
+          <Route path="/bloc" element={<Bloc />} />
           <Route
-            path="/team/:teamId"
-            element={<Team />}
+            path="/bloc/:teamId"
+            element={<Bloc />}
             key={window.location.pathname}
           />
-          <Route path="/teams" element={<Teams />} />
+          <Route path="/marketplace" element={<Marketplace />} />
+          <Route path="/blocs" element={<Blocs />} />
         </Routes>
       </ChakraProvider>
     </>

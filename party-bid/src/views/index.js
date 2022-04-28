@@ -1,4 +1,5 @@
-export { Team } from "./team";
+export { Bloc } from "./bloc";
 export { Home } from "./home";
-export { Teams } from "./teams";
+export { Blocs } from "./blocs";
 export { Governance } from "./gov";
+export { Marketplace } from "./marketplace";

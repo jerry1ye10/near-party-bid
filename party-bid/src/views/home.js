@@ -72,7 +72,7 @@ export const Home = () => {
           textAlign={["center", null, "unset"]}
           width="100%"
         >
-          <Text>Join a team, pool NEAR</Text>
+          <Text>Join a BLOC, pool NEAR</Text>
           <Text>
             Buy NFTs
             <Box
@@ -130,8 +130,18 @@ export const Home = () => {
                 your BLOC to hold and sell your NFT, together.
               </Text>
               <Box mt="20px" display="flex" sx={{ columnGap: "10px" }}>
-                <Button variant="primary" onClick={onCreateBlocOpen}>
-                  Create your BLOC
+                <Button
+                  variant="primary"
+                  disabled={!window.walletConnection.isSignedIn()}
+                  onClick={
+                    window.walletConnection.isSignedIn()
+                      ? onCreateBlocOpen
+                      : () => {}
+                  }
+                >
+                  {window.walletConnection.isSignedIn()
+                    ? "Create your BLOC"
+                    : "Connect Wallet to continue"}
                 </Button>
                 <Button variant="outline">Join a BLOC</Button>
               </Box>

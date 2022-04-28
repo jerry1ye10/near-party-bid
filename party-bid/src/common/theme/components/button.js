@@ -1,11 +1,14 @@
 export const Button = {
   variants: {
     primary: {
-      bg: "linear-gradient(94.39deg, #453CC4 1.12%, #6059BC 99.32%, #F044C3 99.33%)",
+      bg: "linear-gradient(94.39deg, #453CC4 1.12%, #6059BC 100%, #F044C3 100%)",
       color: "white",
       fontWeight: "600",
       height: "48px",
       borderRadius: "10px",
+      "&:hover": {
+        bg: "linear-gradient(94.39deg, #453CC4 1.12%, #6059BC 100%, #F044C3 100%)",
+      },
     },
     outline: {
       bg: "transparent",
