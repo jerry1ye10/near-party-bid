@@ -18,7 +18,7 @@ export const Marketplace = () => {
       data.data.data
 
         .map((i) => i._fieldsProto)
-        .filter((i) => Object.keys(i).length === 5)
+        .filter((i) => Object.keys(i).length === 7)
         .filter((item) => item.status.stringValue === '"Currently being sold"')
     );
     setIsLoading(false);
@@ -67,7 +67,9 @@ export const Marketplace = () => {
                           data.money_accrued?.stringValue ?? 0
                         )
                       ).toFixed(2)}
+                      partyName={data.party_name.stringValue}
                       status={data.status.stringValue}
+                      imageUrl={data.image_url.stringValue}
                     />
                   </Link>
                 ))}

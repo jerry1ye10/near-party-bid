@@ -1,5 +1,5 @@
-import React, { useMemo } from "react";
-import { Box, Image, Text } from "@chakra-ui/react";
+import React, { useMemo, useState } from "react";
+import { Box, Image, Spinner, Text } from "@chakra-ui/react";
 import StockNFT from "../assets/stock_nft.png";
 import NearLogo from "../assets/near_logo.svg";
 const statusObjectHandler = (status) => {
@@ -18,8 +18,16 @@ const statusObjectHandler = (status) => {
   }
 };
 
-export const NFTCard = ({ status, moneyGoal, members, raised }) => {
+export const NFTCard = ({
+  status,
+  moneyGoal,
+  members,
+  raised,
+  partyName,
+  imageUrl,
+}) => {
   const statusObject = useMemo(() => statusObjectHandler(status), [status]);
+  const [imageLoaded, setImageLoaded] = useState(false);
   return (
     <Box
       display="flex"
@@ -35,9 +43,26 @@ export const NFTCard = ({ status, moneyGoal, members, raised }) => {
       }}
       width="fit-content"
     >
-      <Image src={StockNFT} />
-      <Box display="flex" justifyContent="space-between">
-        <Text fontSize="24px">BLOCSana</Text>
+      <Box
+        mb="15px"
+        width="250px"
+        height="250px"
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+      >
+        {!imageLoaded && <Spinner size="lg" />}
+        <Image
+          width="100%"
+          height="100%"
+          objectFit="contain"
+          display={imageLoaded ? "inherit" : "none"}
+          src={imageUrl}
+          onLoad={() => setImageLoaded(true)}
+        />
+      </Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center">
+        <Text fontSize="24px">{partyName}</Text>
         <Image
           transform={{ transition: "all 1s ease" }}
           _hover={{
