@@ -41,6 +41,7 @@ pub struct PartyContract {
     nft_bought: bool, 
     listing_available: bool,
     nft_sold: bool,
+    party_lost: bool,
 }
 
 
@@ -166,7 +167,8 @@ impl PartyContract {
             nft_bought: false, 
             listing_available: false,
             nft_sold: false,
-            nft_account_id: nft_account_id
+            nft_account_id: nft_account_id,
+            party_lost: false
         };
         let total_supply : U128 = U128::from((((money_goal.parse::<u128>().unwrap() as f64) * (1.0 + TRANSACTION_FEE)) as u128));
         this.token.internal_register_account(&owner_id);
@@ -260,6 +262,25 @@ impl PartyContract {
             }
         }
         return (accounts, tokens);
+    }
+
+    pub fn get_records_count(self) -> u8{
+        return self.records.keys().count() as u8;
+    }
+    pub fn get_status(self) -> String{
+    if self.nft_sold{
+        return "NFT has been bought and sold!".to_string();
+    }
+    if self.listing_available{
+        return "Currently being sold".to_string();
+    }
+    if self.nft_bought{
+        return "Currently Voting on Price".to_string();
+    }
+    if self.party_lost{
+        return "Party Lost".to_string();
+    }
+    return "Party Ongoing".to_string();
     }
 
     // Check our records for a specific account id.
@@ -511,6 +532,7 @@ impl PartyContract {
                 match refund_amount {
                     Some(refund) => {
                         Promise::new(copyKey).transfer(((refund as f64) * 0.99) as u128 ); //Takes a 1% transaction fee to account for gas
+                        self.party_lost = true; 
                     }
                     None =>  log!("no valid value"),
                 }
