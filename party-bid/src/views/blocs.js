@@ -25,6 +25,7 @@ export const Blocs = () => {
   useEffect(() => {
     fetchData();
   }, []);
+  console.log(teamData);
   return (
     <>
       {isLoading && <Loader />}

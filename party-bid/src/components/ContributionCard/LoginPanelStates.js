@@ -147,7 +147,7 @@ const ContributionModal = ({
             variant="primary"
             width="100%"
             colorScheme="blue"
-            onClick={() => send_money(moneyInput.current.value)}
+            onClick={() => send_money(moneyInput)}
           >
             Contribute
           </Button>

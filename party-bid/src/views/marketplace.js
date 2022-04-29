@@ -19,7 +19,7 @@ export const Marketplace = () => {
 
         .map((i) => i._fieldsProto)
         .filter((i) => Object.keys(i).length === 5)
-        .filter((item) => item.status.stringValue === "Currently being sold")
+        .filter((item) => item.status.stringValue === '"Currently being sold"')
     );
     setIsLoading(false);
   };

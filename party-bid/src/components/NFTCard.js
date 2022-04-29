@@ -4,15 +4,15 @@ import StockNFT from "../assets/stock_nft.png";
 import NearLogo from "../assets/near_logo.svg";
 const statusObjectHandler = (status) => {
   switch (status) {
-    case "Party Lost":
+    case '"Party Lost"':
       return { bg: "#F7EFEF", color: "#8A4E4E", text: "BLOC Lost" };
-    case "Currently being sold":
+    case '"Currently being sold"':
       return { bg: "#F2F7EF", color: "#708A4E", text: "BLOC for Sale" };
-    case "Currently Voting on Price":
+    case '"Currently Voting on Price"':
       return { bg: "#EFF0F7", color: "#524E8A", text: "Voting on BLOC Price" };
-    case "NFT has been bought and sold!":
-      return { bg: "#EEEEEE", color: "#8A8A8A", text: "Voting on BLOC Price" };
-    case "Party Ongoing":
+    case '"NFT has been bought and sold!"':
+      return { bg: "#EEEEEE", color: "#8A8A8A", text: "NFT has been sold" };
+    case '"Party Ongoing"':
     default:
       return { bg: "#EFF7F2", color: "#4E8A6A", text: "BLOC Live" };
   }
