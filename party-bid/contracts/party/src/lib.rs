@@ -286,7 +286,7 @@ impl PartyContract {
     }
     return "Party Ongoing".to_string();
     }
-    
+
     // Check our records for a specific account id.
     // If account has already contributed, return the amount. If not, return 0.
     pub fn get_record(&self, account_id: &String) -> u128 {
@@ -295,25 +295,6 @@ impl PartyContract {
             None => 0,
             Some(number) => number,
         }
-    }
-
-    pub fn get_records_count(self) -> u8{
-        return self.records.keys().count() as u8;
-    }
-    pub fn get_status(self) -> String{
-    if self.nft_sold{
-        return "NFT has been bought and sold!".to_string();
-    }
-    if self.listing_available{
-        return "Currently being sold".to_string();
-    }
-    if self.nft_bought{
-        return "Currently Voting on Price".to_string();
-    }
-    if self.party_lost{
-        return "Party Lost".to_string();
-    }
-    return "Party Ongoing".to_string();
     }
     //Two cases: Peer to peer, and contract to peer 
     // fn ft_resolve_transfer(
