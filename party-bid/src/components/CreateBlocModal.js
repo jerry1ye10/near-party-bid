@@ -16,64 +16,75 @@ import { indexContract } from "../data/indexer";
 export const CreateBlocModal = ({ isOpen, onClose }) => {
   // TODO: Add Validation
   const [url, set_url] = useState("");
+  const [URLError, setURLError] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [tokenName, setTokenName] = useState("");
   const [symbol, setSymbol] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const toast = useToast();
+
   async function createParty() {
     setIsCreating(true);
-    //TODO: Change this algo when we convert from testnet -> mainnet
-    //Testnet input URL to be in format: https://testnet.paras.id/token/paras-token-v2.testnet::40
-    //currently only works for cheap price
-    const parsedStringArray = url.split("/").pop().split("::");
-    // const contractId = parsedStringArray[0]; // pass this into factory deploy when we move to mainnet
-    const nftId = parsedStringArray[1];
-    const response = await window.parasContract.nft_get_series_price({
-      token_series_id: nftId,
-    });
-
-    try {
-      const resp = await window.contract.deploy(
-        {
-          money_goal: BigInt(
-            parseFloat(response) + 7780000000000000000000
-          ).toString(),
-          nft_id: nftId,
-          current_time: new Date().valueOf().toString(),
-          team_name: teamName,
-          token_name: tokenName,
-          token_symbol: symbol,
-        },
-        "300000000000000" // attached GAS (optional)
-      );
-      toast({
-        title: "BLOC Created!",
-        description: "You've successfully created a block",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
+    setURLError(false);
+    const validURL = url.match(
+      /https:\/\/testnet\.paras\.id\/token\/paras-token-v2\.testnet::\d+/g
+    );
+    if (validURL !== null) {
+      //TODO: Change this algo when we convert from testnet -> mainnet
+      //Testnet input URL to be in format: https://testnet.paras.id/token/paras-token-v2.testnet::40
+      //currently only works for cheap price
+      const parsedStringArray = url.split("/").pop().split("::");
+      // const contractId = parsedStringArray[0]; // pass this into factory deploy when we move to mainnet
+      const nftId = parsedStringArray[1];
+      const response = await window.parasContract.nft_get_series_price({
+        token_series_id: nftId,
       });
 
-      const res = await indexContract(resp);
+      try {
+        const resp = await window.contract.deploy(
+          {
+            money_goal: BigInt(
+              parseFloat(response) + 7780000000000000000000
+            ).toString(),
+            nft_id: nftId,
+            current_time: new Date().valueOf().toString(),
+            team_name: teamName,
+            token_name: tokenName,
+            token_symbol: symbol,
+          },
+          "300000000000000" // attached GAS (optional)
+        );
 
-      if (res.status === 200) {
-        window.location = "/bloc/" + resp;
-        setIsCreating(false);
-      } else {
-        throw Error("Block Creation Failed");
+        const res = await indexContract(resp);
+
+        if (res.status === 200) {
+          toast({
+            title: "BLOC Created!",
+            description: "You've successfully created a block",
+            status: "success",
+            duration: 2000,
+            isClosable: true,
+          });
+          window.location = "/bloc/" + resp;
+          setIsCreating(false);
+        } else {
+          throw Error("Block Creation Failed");
+        }
+      } catch (e) {
+        console.log(e);
+        toast({
+          title: "BLOC Creation Failed!",
+          description: "There was an error in creating the bloc. Try again.",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+        });
       }
-    } catch (e) {
-      console.log(e);
-      toast({
-        title: "BLOC Creation Failed!",
-        description: "There was an error in creating the bloc. Try again.",
-        status: "error",
-        duration: 2000,
-        isClosable: true,
-      });
+      setIsCreating(false);
+    } else {
+      setURLError(true);
+      setIsCreating(false);
     }
-    setIsCreating(false);
   }
 
   return (
@@ -124,7 +135,14 @@ export const CreateBlocModal = ({ isOpen, onClose }) => {
           <Text mt="10px" fontWeight="600" fontSize="15px">
             Enter URL of NFT to Bid:
           </Text>
+          {URLError && (
+            <Text color="red.300">
+              The URL must be a valid link from Paras. Please try submitting a
+              valid URL.
+            </Text>
+          )}
           <Input
+            isInvalid={URLError}
             placeholder="https://testnet.paras.id/token/paras-token-v2.testnet::298"
             mt="5px"
             type="text"
