@@ -125,7 +125,7 @@ export const Coin1 = () => (
         gradientUnits="userSpaceOnUse"
       >
         <stop stopColor="white" />
-        <stop offset="1" stopColor="white" stop-opacity="0" />
+        <stop offset="1" stopColor="white" stopOpacity="0" />
       </linearGradient>
       <linearGradient
         id="paint2_linear_117_120"
@@ -318,7 +318,7 @@ export const Coin2 = () => (
         gradientUnits="userSpaceOnUse"
       >
         <stop stopColor="white" />
-        <stop offset="1" stopColor="white" stop-opacity="0" />
+        <stop offset="1" stopColor="white" stopOpacity="0" />
       </linearGradient>
       <linearGradient
         id="paint2_linear_117_110"
