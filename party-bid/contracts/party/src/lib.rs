@@ -35,6 +35,7 @@ pub struct PartyContract {
     money_accrued: u128,
     nft_account_id: String, 
     nft_id: String,
+    host: AccountId,
     token: FungibleToken,
     metadata: LazyOption<FungibleTokenMetadata>,
     votes: UnorderedMap<String, u128>,
@@ -56,7 +57,7 @@ const TRANSACTION_FEE: f64 = 0.01;
 
 impl Default for PartyContract {
   fn default() -> Self {
-    PartyContract::new("2000000000000000000000000".to_string(), "704".to_string(), "jerry_team".to_string(), "jerry".to_string(), "jerry".to_string(), "paras-token-v2.testnet".to_string())
+    PartyContract::new("2000000000000000000000000".to_string(), "704".to_string(), "jerry_team".to_string(), "jerry".to_string(), "jerry".to_string(), "paras-token-v2.testnet".to_string(), env::signer_account_id())
   }
 }
 
@@ -143,7 +144,7 @@ impl PartyContract{
 #[near_bindgen]
 impl PartyContract {
     #[init]
-    pub fn new(money_goal: String, nft_id: String, team_name:String, name: String, symbol: String, nft_account_id: String) -> Self {
+    pub fn new(money_goal: String, nft_id: String, team_name:String, name: String, symbol: String, nft_account_id: String, host:AccountId) -> Self {
         assert!(!env::state_exists(), "Already, initialized");
         let owner_id = env::current_account_id();
         let metadata = FungibleTokenMetadata {
@@ -163,6 +164,7 @@ impl PartyContract {
             money_goal: (((money_goal.parse::<u128>().unwrap() as f64) * (1.0 + TRANSACTION_FEE)) as u128) ,
             money_accrued: 0,
             nft_id: nft_id,
+            host: host,
             votes: UnorderedMap::new(b"c".to_vec()),
             nft_bought: false, 
             listing_available: false,
@@ -220,6 +222,7 @@ trait ContractParas {
 pub struct TeamMetadata {
     team_name: String,
     token_metadata: FungibleTokenMetadata,
+    host: AccountId
 }
 
 
@@ -239,6 +242,7 @@ impl PartyContract {
         return TeamMetadata {
             team_name: self.team_name,
             token_metadata: self.metadata.get().unwrap(),
+            host: self.host,
         }
     }
     pub fn get_team_name(self) -> String {
@@ -282,7 +286,7 @@ impl PartyContract {
     }
     return "Party Ongoing".to_string();
     }
-
+    
     // Check our records for a specific account id.
     // If account has already contributed, return the amount. If not, return 0.
     pub fn get_record(&self, account_id: &String) -> u128 {
@@ -398,6 +402,16 @@ impl PartyContract {
 
     }
 
+    pub fn get_percent_voted(&self) -> f64 {
+        let mut total_token_count = 0; 
+        for key in self.votes.keys() {
+            let copyKey: AccountId = key.clone().parse().unwrap();
+            let token_count: u128 = self.token.accounts.get(&copyKey).unwrap();
+            total_token_count += token_count;
+        } 
+        return (total_token_count as f64 / self.money_goal as f64)
+    }
+
     pub fn get_listing_available(&self) -> bool{
         return self.listing_available; 
     }
@@ -407,6 +421,7 @@ impl PartyContract {
         let nft_account_id: AccountId = self.nft_account_id.parse().unwrap();
         assert!(self.listing_available);
         assert!(self.nft_bought);
+        assert!(!self.nft_sold);
         let price = self.get_sell_price();
         let deposit = env::attached_deposit();
         assert!(deposit >= price);
@@ -414,7 +429,7 @@ impl PartyContract {
         let signer_id = env::signer_account_id(); 
         let nft_id = &self.nft_id.clone();
         ext_contract_paras::nft_transfer(signer_id, nft_id.to_string(), None, None, nft_account_id, 1, SINGLE_CALL_GAS);
-        self.nft_bought = true; 
+        self.nft_sold = true; 
 
     }
 
@@ -585,6 +600,11 @@ impl PartyContract {
     pub fn get_nft_bought(&self)-> bool{ 
         return self.nft_bought;
     }
+    
+    pub fn get_nft_sold(&self)-> bool{ 
+        return self.nft_sold;
+    }
+
 
     
     #[payable]
