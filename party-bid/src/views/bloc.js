@@ -26,6 +26,7 @@ import {
   SkeletonText,
   Skeleton,
   Badge,
+  Spinner,
 } from "@chakra-ui/react";
 import { ShareIcon, ShareIconHover, ShoppingCart } from "../components/svgs";
 const { networkId } = getConfig("development");
@@ -269,17 +270,16 @@ export const Bloc = () => {
               width={["100%", null, "500px"]}
               height={["300px", null, "500px"]}
             >
-              <Image
-                objectFit="contain"
-                borderRadius="20px"
-                src={
-                  nftImage
-                    ? nftImage
-                    : "https://cryptologos.cc/logos/near-protocol-near-logo.png?v=022"
-                }
-                width={"100%"}
-                height={"100%"}
-              />
+              {nftImage && (
+                <Image
+                  objectFit="contain"
+                  borderRadius="20px"
+                  src={nftImage}
+                  width={"100%"}
+                  height={"100%"}
+                />
+              )}
+              {!nftImage && <Spinner size="xl" />}
             </Box>
             <Box
               display="flex"
