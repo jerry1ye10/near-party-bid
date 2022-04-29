@@ -59,6 +59,7 @@ export const Marketplace = () => {
                   <Link key={idx} to={`/bloc/${data.contract_id.stringValue}`}>
                     <NFTCard
                       key={idx}
+                      members={data.num_people.integerValue}
                       moneyGoal={Number(
                         safeFormatNearAmount(data.money_goal?.stringValue ?? 0)
                       ).toFixed(2)}
