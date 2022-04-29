@@ -36,6 +36,5 @@ export const roundToFourDec = (value) => {
   return Number(value)?.toFixed(4);
 };
 export const toLongNumber = (amount) => {
-  console.log(amount);
   return amount.toLocaleString("fullwide", { useGrouping: false });
 };

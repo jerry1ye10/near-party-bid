@@ -18,14 +18,13 @@ export const Blocs = () => {
       data.data.data
 
         .map((i) => i._fieldsProto)
-        .filter((i) => Object.keys(i).length === 5)
+        .filter((i) => Object.keys(i).length === 7)
     );
     setIsLoading(false);
   };
   useEffect(() => {
     fetchData();
   }, []);
-  console.log(teamData);
   return (
     <>
       {isLoading && <Loader />}
@@ -67,7 +66,9 @@ export const Blocs = () => {
                           data.money_accrued?.stringValue ?? 0
                         )
                       ).toFixed(2)}
+                      partyName={data.party_name.stringValue}
                       status={data.status.stringValue}
+                      imageUrl={data.image_url.stringValue}
                     />
                   </Link>
                 ))}

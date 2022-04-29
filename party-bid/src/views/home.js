@@ -49,7 +49,7 @@ export const Home = () => {
       data.data.data
         .sort((a, b) => b._createTime._seconds - a._createTime._seconds)
         .map((i) => i._fieldsProto)
-        .filter((i) => Object.keys(i).length === 5)
+        .filter((i) => Object.keys(i).length === 7)
         .slice(0, 3)
     );
     setIsLoading(false);
@@ -150,6 +150,8 @@ export const Home = () => {
                       safeFormatNearAmount(data.money_accrued?.stringValue ?? 0)
                     ).toFixed(2)}
                     status={data.status.stringValue}
+                    imageUrl={data.image_url.stringValue}
+                    partyName={data.party_name.stringValue}
                   />
                 </Link>
               ))}
