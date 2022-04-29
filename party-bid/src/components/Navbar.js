@@ -3,7 +3,7 @@ import { Box, Button, Text, useDisclosure } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { TITLE } from "../common/constants";
 import LoginView from "./LoginView";
-import { CreateTeamModal } from "./CreateBlocModal";
+import { CreateBlocModal } from "./CreateBlocModal";
 export const Navbar = () => {
   const pages = [
     { name: "All Blocs", url: "/blocs" },
@@ -45,7 +45,7 @@ export const Navbar = () => {
           variant="link"
           onClick={onCreateBlocOpen}
         >
-          +Create a BLOC
+          + Create a BLOC
         </Button>
         {pages.map((page, idx) => (
           <Link key={idx} to={page.url}>
@@ -61,7 +61,7 @@ export const Navbar = () => {
         ))}
         <LoginView />
       </Box>
-      <CreateTeamModal
+      <CreateBlocModal
         isOpen={isCreateBlockModalOpen}
         onClose={onCreateBlocClose}
       />

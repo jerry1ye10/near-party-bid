@@ -7,7 +7,7 @@ import { NFTCard } from "../components/NFTCard";
 import { LiveFeed } from "../components/LiveFeed";
 import { Footer } from "../components/Footer";
 import NearLogo from "../assets/near_logo.svg";
-import { CreateTeamModal } from "../components/CreateBlocModal";
+import { CreateBlocModal } from "../components/CreateBlocModal";
 import { Coin1, Coin2 } from "../components/svgs";
 import { useSpring, a, to } from "react-spring";
 import { Loader } from "../components/Loader";
@@ -240,7 +240,7 @@ export const Home = () => {
           />
         </Box>
       </Box>
-      <CreateTeamModal
+      <CreateBlocModal
         isOpen={isCreateBlockModalOpen}
         onClose={onCreateBlocClose}
       />

@@ -12,8 +12,8 @@ import {
   Text,
   Input,
 } from "@chakra-ui/react";
-
-export const CreateTeamModal = ({ isOpen, onClose }) => {
+import { indexContract } from "../data/indexer";
+export const CreateBlocModal = ({ isOpen, onClose }) => {
   // TODO: Add Validation
   const [url, set_url] = useState("");
   const [teamName, setTeamName] = useState("");
@@ -26,30 +26,27 @@ export const CreateTeamModal = ({ isOpen, onClose }) => {
     //TODO: Change this algo when we convert from testnet -> mainnet
     //Testnet input URL to be in format: https://testnet.paras.id/token/paras-token-v2.testnet::40
     //currently only works for cheap price
-    // const parsedStringArray = url.split("/").pop().split("::");
+    const parsedStringArray = url.split("/").pop().split("::");
     // const contractId = parsedStringArray[0]; // pass this into factory deploy when we move to mainnet
-    // const nftId = parsedStringArray[1];
-    // const response = await window.parasContract.nft_get_series_price({
-    //   token_series_id: nftId,
-    // });
+    const nftId = parsedStringArray[1];
+    const response = await window.parasContract.nft_get_series_price({
+      token_series_id: nftId,
+    });
 
     try {
-      const account = await window.walletConnection.account();
-      console.log(account);
-      // const resp = await window.contract.deploy(
-      //   {
-      //     money_goal: BigInt(
-      //       parseFloat(response) + 7780000000000000000000
-      //     ).toString(),
-      //     nft_id: nftId,
-      //     current_time: new Date().valueOf().toString(),
-      //     team_name: teamName,
-      //     token_name: tokenName,
-      //     token_symbol: symbol,
-      //   },
-      //   "300000000000000" // attached GAS (optional)
-      // );
-      console.log(resp);
+      const resp = await window.contract.deploy(
+        {
+          money_goal: BigInt(
+            parseFloat(response) + 7780000000000000000000
+          ).toString(),
+          nft_id: nftId,
+          current_time: new Date().valueOf().toString(),
+          team_name: teamName,
+          token_name: tokenName,
+          token_symbol: symbol,
+        },
+        "300000000000000" // attached GAS (optional)
+      );
       toast({
         title: "BLOC Created!",
         description: "You've successfully created a block",
@@ -57,6 +54,15 @@ export const CreateTeamModal = ({ isOpen, onClose }) => {
         duration: 2000,
         isClosable: true,
       });
+
+      const res = await indexContract(resp);
+
+      if (res.status === 200) {
+        window.location = "/bloc/" + resp;
+        setIsCreating(false);
+      } else {
+        throw Error("Block Creation Failed");
+      }
     } catch (e) {
       console.log(e);
       toast({

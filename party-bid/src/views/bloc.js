@@ -40,6 +40,7 @@ import { ContributionFeed } from "../components/ContributionFeed";
 import { AuctionStatusComponents } from "../components/AuctionStatusComponents";
 import AVATAR from "../assets/avatar.svg";
 import { ContributionCard } from "../components/ContributionCard/index";
+import { updateContract } from "../data/updateContract";
 
 export const Bloc = () => {
   const [money_accrued, set_money_accrued] = useState(0.0);
@@ -156,7 +157,7 @@ export const Bloc = () => {
           "set_vote_price",
         ],
       });
-
+      await updateContract(id);
       setContract(newContract);
 
       // get NFTMetadata
