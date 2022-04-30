@@ -40,6 +40,14 @@ export const CreateBlocModal = ({ isOpen, onClose }) => {
         token_series_id: nftId,
       });
 
+      const fetchedNFTMetadata = await window.parasContract.nft_token({
+        token_id: nftId.includes(":") ? `${nftId}` : `${nftId}:1`,
+      });
+
+      const nftImage = fetchedNFTMetadata?.metadata?.media
+        ? `https://ipfs.fleek.co/ipfs/${fetchedNFTMetadata?.metadata?.media}`
+        : null;
+
       try {
         const resp = await window.contract.deploy(
           {
@@ -55,7 +63,7 @@ export const CreateBlocModal = ({ isOpen, onClose }) => {
           "300000000000000" // attached GAS (optional)
         );
 
-        const res = await indexContract(resp);
+        const res = await indexContract(resp, nftImage, teamName);
 
         if (res.status === 200) {
           toast({
