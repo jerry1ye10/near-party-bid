@@ -8,13 +8,9 @@ export default function App() {
     <>
       <ChakraProvider theme={theme}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route index element={<Home />} />
           <Route path="/bloc" element={<Bloc />} />
-          <Route
-            path="/bloc/:teamId"
-            element={<Bloc />}
-            key={window.location.pathname}
-          />
+          <Route path="/bloc/:teamId" element={<Bloc />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/blocs" element={<Blocs />} />
         </Routes>

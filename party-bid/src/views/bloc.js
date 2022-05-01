@@ -10,7 +10,7 @@ import {
   WalletConnection,
   utils,
 } from "near-api-js";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import getConfig from "../config";
 import {
@@ -44,6 +44,8 @@ import { ContributionCard } from "../components/ContributionCard/index";
 import { updateContract } from "../data/updateContract";
 
 export const Bloc = () => {
+  const { teamId } = useParams();
+
   const [money_accrued, set_money_accrued] = useState(0.0);
   const [money_goal, set_money_goal] = useState(0.0);
   const [transactionsData, setTransactions] = useState({});
@@ -95,15 +97,7 @@ export const Bloc = () => {
     }
   }
    */
-
   const history = useLocation();
-
-  const [teamId, setTeamId] = useState("");
-
-  function getTeamId(path) {
-    //given pathname
-    return path.split("/")[2];
-  }
 
   const nftImage = useMemo(
     () =>
@@ -133,32 +127,34 @@ export const Bloc = () => {
 
   React.useEffect(
     async () => {
-      const id = getTeamId(window.location.pathname);
-      setTeamId(id);
-      const newContract = new Contract(window.walletConnection.account(), id, {
-        viewMethods: [
-          "get_money_accrued",
-          "get_money_goal",
-          "get_record",
-          "get_records",
-          "get_nft_id",
-          "get_team_metadata",
-          "get_nft_bought",
-          "get_vote_price",
-          "get_sell_price",
-          "get_percent_voted",
-          "get_token_count",
-          "get_listing_available",
-          "get_nft_sold",
-        ],
-        changeMethods: [
-          "pay_money",
-          "buy_nft",
-          "refund_money",
-          "set_vote_price",
-        ],
-      });
-      await updateContract(id);
+      const newContract = new Contract(
+        window.walletConnection.account(),
+        teamId,
+        {
+          viewMethods: [
+            "get_money_accrued",
+            "get_money_goal",
+            "get_record",
+            "get_records",
+            "get_nft_id",
+            "get_team_metadata",
+            "get_nft_bought",
+            "get_vote_price",
+            "get_sell_price",
+            "get_percent_voted",
+            "get_token_count",
+            "get_listing_available",
+            "get_nft_sold",
+          ],
+          changeMethods: [
+            "pay_money",
+            "buy_nft",
+            "refund_money",
+            "set_vote_price",
+          ],
+        }
+      );
+      await updateContract(teamId);
       setContract(newContract);
 
       // get NFTMetadata
