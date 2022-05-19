@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Box, Image, Spinner, Text } from "@chakra-ui/react";
-import StockNFT from "../assets/stock_nft.png";
 import NearLogo from "../assets/near_logo.svg";
+
 const statusObjectHandler = (status) => {
   switch (status) {
     case '"Party Lost"':

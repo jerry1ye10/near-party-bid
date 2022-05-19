@@ -1,10 +1,4 @@
-import {
-  connect,
-  Contract,
-  keyStores,
-  WalletConnection,
-  utils,
-} from "near-api-js";
+import { utils } from "near-api-js";
 
 export function truncateAddress(address = "", width = 20) {
   if (address.length <= width) {

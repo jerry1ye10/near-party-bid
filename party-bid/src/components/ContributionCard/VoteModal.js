@@ -1,15 +1,9 @@
 import React, { useRef } from "react";
-import { login } from "../../utils";
-import {
-  safeFormatNearAmount,
-  safeParseNearAmount,
-  toLongNumber,
-} from "../../common/utils";
+import { safeFormatNearAmount } from "../../common/utils";
 import {
   Button,
   Box,
   Text,
-  useDisclosure,
   Modal,
   ModalOverlay,
   ModalCloseButton,

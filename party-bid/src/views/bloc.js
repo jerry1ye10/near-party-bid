@@ -213,18 +213,6 @@ export const Bloc = () => {
       });
   }
 
-  // function refund_money() {
-  //   // const deposit = money_entered.concat("0000000000000000000");
-  //   contract
-  //     .refund_money(
-  //       { amount: deposit },
-  //       "300000000000000" // attached GAS (optional)
-  //     )
-  //     .catch((e) => {
-  //       console.log(e);
-  //     });
-  // }
-
   const copy = async () => {
     await navigator.clipboard.writeText(window.location.href);
     toast({

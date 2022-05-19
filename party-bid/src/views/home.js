@@ -1,19 +1,17 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Layout } from "../components/Layout";
 import { Box, Text, Image, Button, useDisclosure } from "@chakra-ui/react";
 import ORB from "../assets/orb.svg";
-import AVATAR from "../assets/avatar.svg";
 import { NFTCard } from "../components/NFTCard";
-import { LiveFeed } from "../components/LiveFeed";
-import { Footer } from "../components/Footer";
-import NearLogo from "../assets/near_logo.svg";
+
 import { CreateBlocModal } from "../components/CreateBlocModal";
 import { Coin1, Coin2 } from "../components/svgs";
-import { useSpring, a, to } from "react-spring";
+import { useSpring, a } from "react-spring";
 import { Link } from "react-router-dom";
 import { safeFormatNearAmount } from "../common/utils";
 import axios from "axios";
 import { Loader } from "../components/Loader";
+
 export const Home = () => {
   const {
     isOpen: isCreateBlockModalOpen,
@@ -223,71 +221,12 @@ export const Home = () => {
               </Box>
             </Box>
           </Box>
-          {/* <Box mt={["50px", null, "100px"]}>
-        <Text mb="24px" fontSize="28px" fontWeight="700">
-          Latest BLOC Activity
-        </Text>
-        <Box mb="100px">
-          <LiveFeed
-            feed={[
-              {
-                type: "Contribution",
-                user: { name: "user.near", avatar: AVATAR },
-                amount: "1.5 NEAR",
-                blocName: "makeoBLOC",
-              },
-              {
-                type: "Contribution",
-                user: { name: "user.near", avatar: AVATAR },
-                amount: "1.5 NEAR",
-                blocName: "makeoBLOC",
-              },
-              {
-                type: "Contribution",
-                user: { name: "user.near", avatar: AVATAR },
-                amount: "1.5 NEAR",
-                blocName: "makeoBLOC",
-              },
-              {
-                type: "Contribution",
-                user: { name: "user.near", avatar: AVATAR },
-                amount: "1.5 NEAR",
-                blocName: "makeoBLOC",
-              },
-              {
-                type: "Contribution",
-                user: { name: "user.near", avatar: AVATAR },
-                amount: "1.5 NEAR",
-                blocName: "makeoBLOC",
-              },
-              {
-                type: "Contribution",
-                user: { name: "user.near", avatar: AVATAR },
-                amount: "1.5 NEAR",
-                blocName: "makeoBLOC",
-              },
-              {
-                type: "Contribution",
-                user: { name: "user.near", avatar: AVATAR },
-                amount: "1.5 NEAR",
-                blocName: "makeoBLOC",
-              },
-              {
-                type: "Contribution",
-                user: { name: "user.near", avatar: AVATAR },
-                amount: "1.5 NEAR",
-                blocName: "makeoBLOC",
-              },
-            ]}
-          />
-        </Box>
-      </Box> */}
           <CreateBlocModal
             isOpen={isCreateBlockModalOpen}
             onClose={onCreateBlocClose}
           />
         </Layout>
-      )}{" "}
+      )}
     </>
   );
 };

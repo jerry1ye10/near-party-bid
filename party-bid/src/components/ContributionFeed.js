@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Image, Text, Badge, Avatar } from "@chakra-ui/react";
+import { Box, Text, Avatar } from "@chakra-ui/react";
 
 export const ContributionFeed = ({ feed }) => {
   return (

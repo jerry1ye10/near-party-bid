@@ -1,16 +1,6 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 
-import getConfig from "../config";
-import {
-  Grid,
-  Input,
-  Button,
-  Box,
-  Image,
-  Text,
-  Tooltip,
-  Badge,
-} from "@chakra-ui/react";
+import { Box, Text, Tooltip, Badge } from "@chakra-ui/react";
 import { QuestionMark, ShareIcon, ShoppingCart } from "../components/svgs";
 export const AuctionStatusComponents = (status, price) => {
   const copyObjectHandler = (status) => {

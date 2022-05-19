@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Layout } from "../components/Layout";
 import { NFTCard } from "../components/NFTCard";
-import { Box, Text, Image, Button, useDisclosure } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import { safeFormatNearAmount } from "../common/utils";
 import axios from "axios";
 import { Loader } from "../components/Loader";
